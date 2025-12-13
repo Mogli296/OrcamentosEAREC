@@ -29,10 +29,10 @@ export const mockQuote: QuoteData = {
   // 💰 PRECIFICAÇÃO (ALTERE AQUI OS VALORES)
   // ========================================================================
   
-  basePrice: 5000,       // Preço Mínimo: Custo base para tirar a equipe de casa (Mobilização)
-  studioFee: 2500,       // Taxa de Estúdio: Somada apenas se o cliente escolher "Estúdio"
-  photoUnitPrice: 150,   // Valor Unitário: Preço por cada foto selecionada no contador
-  videoUnitPrice: 1200,  // Valor Unitário: Preço por cada vídeo (1 min) selecionado
+  basePrice: 600,       // Preço Mínimo: Custo base para tirar a equipe de casa (Mobilização)
+  studioFee: 250,       // Taxa de Estúdio: Somada apenas se o cliente escolher "Estúdio"
+  photoUnitPrice: 25,   // Valor Unitário: Preço por cada foto selecionada no contador
+  videoUnitPrice: 600,  // Valor Unitário: Preço por cada vídeo (1 min) selecionado
   
   // ========================================================================
 
