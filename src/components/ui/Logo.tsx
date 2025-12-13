@@ -5,7 +5,7 @@ import { cn } from '../../lib/utils';
 // NOTE: We cannot import images directly in native ESM (browser) without a bundler loader.
 // We reference the file by its serving path. 
 // Ensure 'src/assets/logo.png' exists in your project structure.
-const logoSrc = '/src/assets/logo.png'; 
+const logoSrc = './src/assets/logo.png'; 
 
 interface LogoProps {
   className?: string; // Classes CSS extras para tamanho (w-*, h-*)
