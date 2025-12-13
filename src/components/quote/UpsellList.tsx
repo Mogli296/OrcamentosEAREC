@@ -11,7 +11,9 @@ import {
   Sparkles,
   CheckCircle2,
   Minus,
-  Plus
+  Plus,
+  MessageSquarePlus,
+  ArrowRight
 } from 'lucide-react';
 import { QuoteData, OccasionType, LocationType } from '../../types';
 import { formatCurrency, cn } from '../../lib/utils';
@@ -28,6 +30,7 @@ interface ConfiguratorProps {
   setPhotoQty: (n: number) => void;
   videoQty: number; // Quantidade de vídeos
   setVideoQty: (n: number) => void;
+  onHighlightCTA?: (highlight: boolean) => void;
 }
 
 /**
@@ -41,11 +44,10 @@ const UpsellList: React.FC<ConfiguratorProps> = ({
   occasion, setOccasion,
   location, setLocation,
   photoQty, setPhotoQty,
-  videoQty, setVideoQty
+  videoQty, setVideoQty,
+  onHighlightCTA
 }) => {
 
-  // CONFIGURAÇÃO DAS OCASIÕES
-  // Para adicionar uma nova ocasião, adicione um objeto aqui e atualize o tipo OccasionType.
   const occasions = [
     { id: 'institutional', label: 'Institucional', icon: Briefcase, desc: 'Corporativo & Marca' },
     { id: 'advertising', label: 'Publicidade', icon: Megaphone, desc: 'Comercial & Vendas' },
@@ -54,7 +56,7 @@ const UpsellList: React.FC<ConfiguratorProps> = ({
   ];
 
   return (
-    <section className="py-24 px-6 md:px-12 bg-neutral-900/30 border-y border-white/5 relative overflow-hidden">
+    <section id="configurator" className="py-24 px-6 md:px-12 bg-neutral-900/30 border-y border-white/5 relative overflow-hidden scroll-mt-20">
       {/* Background Decorativo (Luzes de fundo) */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-DEFAULT/5 rounded-full blur-[120px] pointer-events-none" />
 
@@ -143,7 +145,6 @@ const UpsellList: React.FC<ConfiguratorProps> = ({
                     <div>
                         <h4 className="text-xl font-serif text-white">Estúdio Controlado</h4>
                         <p className="text-sm text-neutral-400 mt-1">Fundo infinito, iluminação de cinema e estrutura completa.</p>
-                        {/* Exibe o preço extra vindo do mock.ts */}
                         <span className="text-xs text-white/60 mt-2 block font-medium">+ {formatCurrency(data.studioFee)} (Taxa de Locação)</span>
                     </div>
                 </motion.div>
@@ -207,8 +208,35 @@ const UpsellList: React.FC<ConfiguratorProps> = ({
             </div>
         </div>
 
+        {/* NOVO: ORÇAMENTO PERSONALIZADO */}
+        <motion.div 
+           initial={{ opacity: 0, y: 20 }}
+           whileInView={{ opacity: 1, y: 0 }}
+           viewport={{ once: true }}
+           className="relative group cursor-pointer"
+           onClick={() => window.open('https://wa.me/5584981048857?text=Olá,%20gostaria%20de%20um%20orçamento%20personalizado.', '_blank')}
+        >
+          <div className="absolute inset-0 bg-brand-DEFAULT/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <div className="relative border border-dashed border-brand-DEFAULT/40 hover:border-brand-DEFAULT bg-brand-DEFAULT/5 rounded-lg p-6 flex flex-col md:flex-row items-center justify-between gap-6 transition-all duration-300">
+             <div className="flex items-center gap-4">
+               <div className="p-3 bg-brand-DEFAULT text-white rounded-full">
+                  <MessageSquarePlus size={24} />
+               </div>
+               <div className="text-center md:text-left">
+                  <h4 className="text-lg font-serif text-white">Orçamento Personalizado</h4>
+                  <p className="text-sm text-neutral-400">Precisa de diárias adicionais, casting específico ou locações complexas?</p>
+               </div>
+             </div>
+             <div className="flex items-center gap-2 text-brand-DEFAULT font-medium text-sm uppercase tracking-wider group-hover:translate-x-2 transition-transform">
+               Falar com Produtor <ArrowRight size={16} />
+             </div>
+          </div>
+        </motion.div>
+
         {/* 4. ITENS INCLUSOS (Estática) */}
-        <div className="bg-white/5 rounded-lg p-8 border border-white/5">
+        <motion.div 
+          className="bg-white/5 rounded-lg p-8 border border-white/5"
+        >
             <h3 className="font-serif text-2xl text-white mb-6 flex items-center gap-3">
                 <Sparkles className="text-brand-DEFAULT" size={20} />
                 Incluso na Experiência
@@ -235,7 +263,7 @@ const UpsellList: React.FC<ConfiguratorProps> = ({
                     </motion.div>
                 ))}
             </div>
-        </div>
+        </motion.div>
 
       </div>
     </section>

@@ -55,18 +55,24 @@ const Logo: React.FC<LogoProps> = ({ className, animate = false }) => {
         EA
       </text>
 
-      {/* Ponto Central - Vermelho Marca */}
-      <circle 
+      {/* Ponto Central - Vermelho Marca - Animação de Pulse (REC Effect) */}
+      <motion.circle 
         cx="105" 
         cy="36" 
-        r="7" 
+        r="13" 
         fill="#DC2626" 
         className="drop-shadow-[0_0_8px_rgba(220,38,38,0.8)]"
+        animate={{ opacity: [1, 0.6, 1] }}
+        transition={{ 
+          duration: 3, 
+          repeat: Infinity, 
+          ease: "easeInOut" 
+        }}
       />
 
       {/* Texto REC - Vermelho Marca */}
       <text 
-        x="125" 
+        x="128" 
         y="52" 
         fontFamily="'Inter', sans-serif" 
         fontWeight="800" 

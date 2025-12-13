@@ -16,6 +16,16 @@ interface HeroProps {
  * Exibe a imagem de fundo, o logo e a saudação personalizada.
  */
 const Hero: React.FC<HeroProps> = ({ data }) => {
+
+  const handleScrollToConfig = () => {
+    const element = document.getElementById('configurator');
+    if (element) {
+      // Pequeno offset para garantir que o título fique bem posicionado
+      const y = element.getBoundingClientRect().top + window.scrollY - 80;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
+  };
+
   return (
     <section className="relative w-full h-screen overflow-hidden flex items-center justify-center">
       
@@ -29,7 +39,7 @@ const Hero: React.FC<HeroProps> = ({ data }) => {
         {/* Overlay Escuro para garantir leitura do texto */}
         <div className="absolute inset-0 bg-gradient-to-b from-neutral-950/30 via-neutral-950/70 to-neutral-950 z-10" />
         
-        {/* Imagem de Fundo (Altere a URL abaixo para mudar a imagem da capa) */}
+        {/* Imagem de Fundo */}
         <img 
           src="https://picsum.photos/id/42/1920/1080" 
           alt="Cinematic Background" 
@@ -44,9 +54,8 @@ const Hero: React.FC<HeroProps> = ({ data }) => {
         animate="visible"
         className="relative z-20 text-center px-6 max-w-5xl"
       >
-        {/* Logo EAREC */}
+        {/* Logo EAREC - Centralizada */}
         <motion.div variants={fadeInUp} className="mb-6 flex justify-center">
-            {/* Ajuste 'w-64' ou 'w-80' para mudar tamanho da logo */}
             <Logo className="w-64 md:w-96" />
         </motion.div>
         
@@ -66,13 +75,22 @@ const Hero: React.FC<HeroProps> = ({ data }) => {
 
       {/* Indicador de Scroll (Seta pulando) */}
       <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.5, duration: 1 }}
-        className="absolute bottom-10 z-20 flex flex-col items-center gap-2"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 2, duration: 1 }}
+        className="absolute bottom-12 z-20 flex flex-col items-center gap-3 cursor-pointer group"
+        onClick={handleScrollToConfig}
       >
-        <span className="text-xs tracking-widest text-white/50 uppercase">Deslize para configurar</span>
-        <ChevronDown className="text-white/70 animate-bounce" size={24} />
+        <span className="text-sm font-medium tracking-[0.2em] text-white/80 uppercase drop-shadow-md group-hover:text-brand-DEFAULT transition-colors">
+          Configurar Projeto
+        </span>
+        <motion.div
+          animate={{ y: [0, 10, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+          className="p-2 bg-white/5 rounded-full border border-white/10 backdrop-blur-sm group-hover:border-brand-DEFAULT/50 transition-colors"
+        >
+          <ChevronDown className="text-white drop-shadow-lg" size={32} />
+        </motion.div>
       </motion.div>
     </section>
   );

@@ -1,19 +1,139 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, Calendar, MapPin, User, Smartphone, Lock, CheckCircle2 } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
+import { ArrowRight, Calendar, MapPin, User, Smartphone, Lock, CheckCircle2, Loader2 } from 'lucide-react';
 import Logo from '../components/ui/Logo';
 import Button from '../components/ui/Button';
 import { ClientData } from '../types';
-import { fadeInUp, staggerContainer } from '../lib/animations';
 
 interface WelcomeViewProps {
   onStart: (data: ClientData) => void;
   onAdminClick: () => void;
 }
 
-/**
- * Tela de Boas-Vindas (Landing Page)
- */
+// Variantes para a sequência de entrada "Cinematográfica"
+const introContainer: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.4, 
+      delayChildren: 0.2
+    }
+  }
+};
+
+// Variante específica da Logo: Começa mais baixo (centro) e sobe
+const logoVariant: Variants = {
+  hidden: { 
+    opacity: 0, 
+    y: 180, 
+    scale: 1.1 
+  },
+  visible: { 
+    opacity: 1, 
+    y: 0, 
+    scale: 1,
+    transition: { 
+      duration: 1.5, 
+      ease: [0.25, 0.1, 0.25, 1.0] 
+    } 
+  }
+};
+
+const formVariant: Variants = {
+  hidden: { opacity: 0, y: 40 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: { duration: 1.0, ease: "easeOut" } 
+  }
+};
+
+// Sub-componente para Input com Validação Rápida (1s)
+const SmartInput = ({ 
+  icon: Icon, 
+  name, 
+  type = "text", 
+  placeholder, 
+  value, 
+  onChange, 
+  minLength = 3,
+  className 
+}: any) => {
+  const [status, setStatus] = useState<'idle' | 'typing' | 'loading' | 'valid'>('idle');
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (!value) {
+      setStatus('idle');
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      return;
+    }
+
+    setStatus('typing');
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
+    timeoutRef.current = setTimeout(() => {
+      setStatus('loading');
+      
+      setTimeout(() => {
+        if (value.length >= minLength) {
+          setStatus('valid');
+        } else {
+          setStatus('idle');
+        }
+      }, 800);
+
+    }, 1000); 
+
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, [value, minLength]);
+
+  return (
+    <div className="group relative">
+      <Icon className="absolute left-0 top-3 text-neutral-500 group-focus-within:text-brand-DEFAULT transition-colors" size={20} />
+      <input 
+        type={type} 
+        name={name}
+        required
+        placeholder={placeholder}
+        value={value}
+        onChange={onChange}
+        className={`w-full bg-transparent border-b border-white/20 py-3 pl-8 pr-8 text-white focus:outline-none focus:border-brand-DEFAULT transition-colors placeholder:text-neutral-600 ${className}`}
+      />
+      
+      <AnimatePresence mode="wait">
+        {status === 'loading' && (
+          <motion.div
+            key="loader"
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.5 }}
+            className="absolute right-0 top-3 text-neutral-400"
+          >
+            <Loader2 size={18} className="animate-spin" />
+          </motion.div>
+        )}
+
+        {status === 'valid' && (
+          <motion.div
+            key="success"
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 400, damping: 15 }}
+            className="absolute right-0 top-3 text-emerald-500 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]"
+          >
+            <CheckCircle2 size={20} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
 const WelcomeView: React.FC<WelcomeViewProps> = ({ onStart, onAdminClick }) => {
   const [formData, setFormData] = useState<ClientData>({
     name: '',
@@ -33,22 +153,10 @@ const WelcomeView: React.FC<WelcomeViewProps> = ({ onStart, onAdminClick }) => {
     }
   };
 
-  // Helper para renderizar o ícone de sucesso
-  const SuccessIcon = ({ show }: { show: boolean }) => (
-    <AnimatePresence>
-      {show && (
-        <motion.div
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0, opacity: 0 }}
-          transition={{ type: "spring", stiffness: 400, damping: 15 }}
-          className="absolute right-0 top-3 text-emerald-500 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]"
-        >
-          <CheckCircle2 size={20} />
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
+  const isFormValid = formData.name.length > 2 && 
+                      formData.location.length > 3 && 
+                      formData.date.length > 0 && 
+                      formData.contact.length > 5;
 
   return (
     <div className="w-full h-screen flex flex-col items-center justify-center bg-neutral-950 relative overflow-hidden px-6">
@@ -57,7 +165,7 @@ const WelcomeView: React.FC<WelcomeViewProps> = ({ onStart, onAdminClick }) => {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-neutral-900 via-neutral-950 to-black z-0" />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-brand-DEFAULT/5 rounded-full blur-[150px] pointer-events-none" />
 
-      {/* Botão Admin (Discreto no canto superior direito) */}
+      {/* Botão Admin */}
       <motion.button
         initial={{ opacity: 0 }}
         animate={{ opacity: 0.3 }}
@@ -70,98 +178,96 @@ const WelcomeView: React.FC<WelcomeViewProps> = ({ onStart, onAdminClick }) => {
       </motion.button>
 
       <motion.div 
-        variants={staggerContainer}
+        variants={introContainer}
         initial="hidden"
         animate="visible"
         className="relative z-10 w-full max-w-md"
       >
-        <div className="flex justify-center mb-12">
-          {/* Logo agora usa SVG interno, não precisa de arquivo externo */}
+        <motion.div variants={logoVariant} className="flex justify-center mb-10">
           <Logo className="w-64 md:w-80" animate />
-        </div>
+        </motion.div>
 
         <motion.form 
-          variants={fadeInUp}
+          variants={formVariant}
           onSubmit={handleSubmit}
           className="space-y-8 bg-white/5 p-8 rounded-2xl border border-white/5 backdrop-blur-md shadow-2xl relative"
         >
-          {/* Borda superior brilhante sutil */}
           <div className="absolute top-0 left-8 right-8 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 
-          <div className="space-y-2">
-            <h2 className="text-xl text-white font-medium text-center mb-6">Iniciar Novo Projeto</h2>
+          {/* Cabeçalho Ajustado com Restrição de Largura */}
+          <div className="flex flex-col items-center mb-6">
+            <h2 className="text-xl text-white font-medium">Novo Orçamento</h2>
+            <p className="text-[10px] text-neutral-500 uppercase tracking-widest font-medium mt-1 w-full text-center">(Preencha corretamente)</p>
           </div>
 
           <div className="space-y-5">
-            <div className="group relative">
-              <User className="absolute left-0 top-3 text-neutral-500 group-focus-within:text-brand-DEFAULT transition-colors" size={20} />
-              <input 
-                type="text" 
-                name="name"
-                required
-                placeholder="Seu Nome ou Empresa"
-                value={formData.name}
-                onChange={handleChange}
-                className="w-full bg-transparent border-b border-white/20 py-3 pl-8 pr-8 text-white focus:outline-none focus:border-brand-DEFAULT transition-colors placeholder:text-neutral-600"
-              />
-              <SuccessIcon show={formData.name.length > 2} />
-            </div>
+            <SmartInput 
+              icon={User}
+              name="name"
+              placeholder="Seu Nome ou Empresa"
+              value={formData.name}
+              onChange={handleChange}
+              minLength={3}
+            />
 
-            <div className="group relative">
-              <MapPin className="absolute left-0 top-3 text-neutral-500 group-focus-within:text-brand-DEFAULT transition-colors" size={20} />
-              <input 
-                type="text" 
-                name="location"
-                placeholder="Cidade / Local do Evento"
-                value={formData.location}
-                onChange={handleChange}
-                className="w-full bg-transparent border-b border-white/20 py-3 pl-8 pr-8 text-white focus:outline-none focus:border-brand-DEFAULT transition-colors placeholder:text-neutral-600"
-              />
-              <SuccessIcon show={formData.location.length > 3} />
-            </div>
+            <SmartInput 
+              icon={MapPin}
+              name="location"
+              placeholder="Cidade / Local do Evento"
+              value={formData.location}
+              onChange={handleChange}
+              minLength={4}
+            />
 
-            <div className="group relative">
-              <Calendar className="absolute left-0 top-3 text-neutral-500 group-focus-within:text-brand-DEFAULT transition-colors" size={20} />
-              <input 
-                type="date" 
-                name="date"
-                required
-                value={formData.date}
-                onChange={handleChange}
-                style={{ colorScheme: 'dark' }}
-                className="w-full bg-transparent border-b border-white/20 py-3 pl-8 pr-8 text-white focus:outline-none focus:border-brand-DEFAULT transition-colors placeholder:text-neutral-600 [&::-webkit-calendar-picker-indicator]:opacity-60 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
-              />
-              <SuccessIcon show={!!formData.date} />
-            </div>
+            <SmartInput 
+              icon={Calendar}
+              name="date"
+              type="date"
+              placeholder=""
+              value={formData.date}
+              onChange={handleChange}
+              minLength={8}
+              className="[&::-webkit-calendar-picker-indicator]:opacity-60 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+            />
 
-            <div className="group relative">
-              <Smartphone className="absolute left-0 top-3 text-neutral-500 group-focus-within:text-brand-DEFAULT transition-colors" size={20} />
-              <input 
-                type="text" 
-                name="contact"
-                required
-                placeholder="Whatsapp ou Email"
-                value={formData.contact}
-                onChange={handleChange}
-                className="w-full bg-transparent border-b border-white/20 py-3 pl-8 pr-8 text-white focus:outline-none focus:border-brand-DEFAULT transition-colors placeholder:text-neutral-600"
-              />
-              <SuccessIcon show={formData.contact.length > 5} />
-            </div>
+            <SmartInput 
+              icon={Smartphone}
+              name="contact"
+              placeholder="Whatsapp ou Email"
+              value={formData.contact}
+              onChange={handleChange}
+              minLength={5}
+            />
           </div>
 
           <motion.div
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            variants={formVariant}
             className="pt-4"
           >
-            <Button className="w-full group" size="lg">
-              <span className="mr-2">Visualizar Orçamento</span>
-              <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-            </Button>
+            <motion.div
+              className="rounded-full"
+              animate={isFormValid ? {
+                boxShadow: [
+                  "0 0 0px rgba(220, 38, 38, 0)",
+                  "0 0 25px rgba(220, 38, 38, 0.5)",
+                  "0 0 0px rgba(220, 38, 38, 0)"
+                ]
+              } : { boxShadow: "0 0 0px rgba(0,0,0,0)" }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            >
+              <Button className="w-full group" size="lg">
+                <span className="mr-2">Visualizar Orçamento</span>
+                <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </motion.div>
           </motion.div>
         </motion.form>
 
-        <motion.p variants={fadeInUp} className="text-center text-neutral-600 text-sm mt-8">
+        <motion.p variants={formVariant} className="text-center text-neutral-600 text-sm mt-8">
           Experiência Audiovisual High-End
         </motion.p>
       </motion.div>

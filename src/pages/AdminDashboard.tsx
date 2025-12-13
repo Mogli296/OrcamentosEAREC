@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Lock, Save, DollarSign, LogOut, ShieldAlert, Loader2, KeyRound } from 'lucide-react';
 import Button from '../components/ui/Button';
@@ -23,22 +23,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentConfig, onUpdate
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [attempts, setAttempts] = useState(0);
-  const [isLocked, setIsLocked] = useState(false);
-  const [lockTimer, setLockTimer] = useState(0);
-
-  // Efeito para gerenciar o cronômetro de bloqueio (Rate Limiting)
-  useEffect(() => {
-    let interval: ReturnType<typeof setInterval>;
-    if (isLocked && lockTimer > 0) {
-      interval = setInterval(() => {
-        setLockTimer((prev) => prev - 1);
-      }, 1000);
-    } else if (lockTimer === 0) {
-      setIsLocked(false);
-      setAttempts(0); // Reseta tentativas após o bloqueio expirar
-    }
-    return () => clearInterval(interval);
-  }, [isLocked, lockTimer]);
 
   // Estado do Formulário de Edição
   const [formData, setFormData] = useState({
@@ -51,13 +35,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentConfig, onUpdate
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Se estiver bloqueado, não processa
-    if (isLocked) return;
-
     setError('');
     setIsLoading(true);
 
-    // Adiciona delay artificial para desencorajar ataques de força bruta rápidos
+    // Adiciona delay artificial para segurança e UX
     await securityDelay();
 
     const isValid = await verifyPassword(password);
@@ -65,17 +46,17 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentConfig, onUpdate
     if (isValid) {
       setIsAuthenticated(true);
       setError('');
+      setAttempts(0);
     } else {
       const newAttempts = attempts + 1;
       setAttempts(newAttempts);
       setIsLoading(false);
       setPassword('');
 
-      // Lógica de Bloqueio (3 tentativas erradas)
+      // Lógica de Expulsão (3 tentativas erradas)
       if (newAttempts >= 3) {
-        setIsLocked(true);
-        setLockTimer(30); // Bloqueia por 30 segundos
-        setError(`Muitas tentativas. Bloqueado por 30s.`);
+        // Redireciona imediatamente para a tela de boas-vindas
+        onExit();
       } else {
         setError(`Senha incorreta. Tentativas restantes: ${3 - newAttempts}`);
       }
@@ -97,7 +78,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentConfig, onUpdate
       ...currentConfig,
       ...formData
     });
-    // Feedback visual simples usando alert nativo (pode ser melhorado para um Toast)
+    // Feedback visual simples
     alert('Configurações salvas com segurança!');
   };
 
@@ -105,8 +86,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentConfig, onUpdate
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-neutral-950 flex flex-col items-center justify-center p-6 relative overflow-hidden">
-        {/* Fundo dinâmico indicando estado de alerta se houver erro */}
-        <div className={`absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] transition-colors duration-1000 ${isLocked ? 'from-red-900/20 via-neutral-950 to-black' : 'from-neutral-900 via-neutral-950 to-black'} z-0`} />
+        {/* Fundo dinâmico */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-neutral-900 via-neutral-950 to-black z-0" />
         
         <motion.div 
           initial="hidden"
@@ -115,32 +96,20 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentConfig, onUpdate
           className="relative z-10 w-full max-w-sm bg-neutral-900/80 border border-white/5 p-8 rounded-2xl backdrop-blur-xl shadow-2xl"
         >
           <div className="flex justify-center mb-8">
-            <AnimatePresence mode="wait">
-              {isLocked ? (
-                 <motion.div 
-                    key="locked"
-                    initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}
-                    className="p-4 bg-red-500/10 rounded-full text-red-500 shadow-[0_0_20px_rgba(220,38,38,0.2)]"
-                 >
-                    <ShieldAlert size={32} />
-                 </motion.div>
-              ) : (
-                <motion.div 
-                    key="normal"
-                    initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}
-                    className="p-4 bg-brand-DEFAULT/10 rounded-full text-brand-DEFAULT shadow-[0_0_20px_rgba(220,38,38,0.1)]"
-                >
-                    <Lock size={32} />
-                </motion.div>
-              )}
-            </AnimatePresence>
+            <motion.div 
+                key="normal"
+                initial={{ scale: 0 }} animate={{ scale: 1 }}
+                className="p-4 bg-brand-DEFAULT/10 rounded-full text-brand-DEFAULT shadow-[0_0_20px_rgba(220,38,38,0.1)]"
+            >
+                <Lock size={32} />
+            </motion.div>
           </div>
           
           <h2 className="text-2xl font-serif text-white text-center mb-2">
-            {isLocked ? "Acesso Bloqueado" : "Acesso Restrito"}
+            Acesso Restrito
           </h2>
           <p className="text-neutral-500 text-center text-sm mb-8">
-            {isLocked ? `Aguarde ${lockTimer}s para tentar novamente.` : "Área exclusiva para administradores."}
+            Área exclusiva para administradores.
           </p>
 
           <form onSubmit={handleLogin} className="space-y-4">
@@ -150,13 +119,12 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentConfig, onUpdate
               </div>
               <input 
                 type="password" 
-                placeholder={isLocked ? "Bloqueado..." : "Senha Mestre"}
+                placeholder="Senha Mestre"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                disabled={isLoading || isLocked}
+                disabled={isLoading}
                 className={`w-full bg-neutral-950 border rounded-lg pl-10 pr-4 py-3 text-white transition-colors focus:outline-none
                   ${error ? 'border-red-500/50 focus:border-red-500' : 'border-white/10 focus:border-brand-DEFAULT'}
-                  ${isLocked ? 'opacity-50 cursor-not-allowed' : ''}
                 `}
                 autoFocus
               />
@@ -186,7 +154,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentConfig, onUpdate
                <Button 
                 type="submit" 
                 className="w-2/3 relative"
-                disabled={isLoading || isLocked}
+                disabled={isLoading}
                >
                  {isLoading ? <Loader2 className="animate-spin" size={20} /> : "Autenticar"}
                </Button>

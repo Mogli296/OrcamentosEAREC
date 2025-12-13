@@ -7,9 +7,10 @@ interface StickyFooterProps {
   totalPrice: number;
   onApprove: () => void;
   isApproved: boolean;
+  highlight?: boolean; // Nova prop para incentivar o clique
 }
 
-const StickyFooter: React.FC<StickyFooterProps> = ({ totalPrice, onApprove, isApproved }) => {
+const StickyFooter: React.FC<StickyFooterProps> = ({ totalPrice, onApprove, isApproved, highlight = false }) => {
   return (
     <motion.div 
       initial={{ y: 100 }}
@@ -40,8 +41,30 @@ const StickyFooter: React.FC<StickyFooterProps> = ({ totalPrice, onApprove, isAp
               {!isApproved ? (
                 <motion.div
                   key="action-btn"
+                  className="rounded-full"
                   initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
+                  animate={highlight ? {
+                    opacity: 1, 
+                    scale: 1,
+                    boxShadow: [
+                      "0 0 0px rgba(220, 38, 38, 0)",
+                      "0 0 30px rgba(220, 38, 38, 0.6)",
+                      "0 0 0px rgba(220, 38, 38, 0)"
+                    ]
+                  } : { 
+                    opacity: 1, 
+                    scale: 1,
+                    boxShadow: "0 0 0px rgba(0,0,0,0)"
+                  }}
+                  transition={{
+                    opacity: { duration: 0.3 },
+                    scale: { duration: 0.3 },
+                    boxShadow: highlight ? {
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    } : { duration: 0.3 }
+                  }}
                   exit={{ opacity: 0, scale: 0.9 }}
                 >
                   <Button 

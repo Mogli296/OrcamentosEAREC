@@ -29,10 +29,10 @@ export const mockQuote: QuoteData = {
   // 💰 PRECIFICAÇÃO (ALTERE AQUI OS VALORES)
   // ========================================================================
   
-  basePrice: 600,       // Preço Mínimo: Custo base para tirar a equipe de casa (Mobilização)
-  studioFee: 250,       // Taxa de Estúdio: Somada apenas se o cliente escolher "Estúdio"
-  photoUnitPrice: 25,   // Valor Unitário: Preço por cada foto selecionada no contador
-  videoUnitPrice: 600,  // Valor Unitário: Preço por cada vídeo (1 min) selecionado
+  basePrice: 5000,       // Preço Mínimo: Custo base para tirar a equipe de casa (Mobilização)
+  studioFee: 2500,       // Taxa de Estúdio: Somada apenas se o cliente escolher "Estúdio"
+  photoUnitPrice: 150,   // Valor Unitário: Preço por cada foto selecionada no contador
+  videoUnitPrice: 1200,  // Valor Unitário: Preço por cada vídeo (1 min) selecionado
   
   // ========================================================================
 
@@ -67,13 +67,12 @@ export const mockQuote: QuoteData = {
   ],
 
   // Imagens do Moodboard (Galeria de Inspiração)
-  // Substitua as URLs por links das suas fotos reais
   moodboardImages: [
-    "https://picsum.photos/id/237/600/800",
-    "https://picsum.photos/id/10/800/600",
-    "https://picsum.photos/id/48/600/900",
-    "https://picsum.photos/id/64/800/500",
-    "https://picsum.photos/id/91/600/600",
-    "https://picsum.photos/id/184/700/500",
+    "https://i.ibb.co/7dDRV17v/img1.jpg",
+    "https://i.ibb.co/Y7J8K2fn/img2.jpg",
+    "https://i.ibb.co/23WfxFKV/img3.jpg",
+    "https://i.ibb.co/CKXCryZP/img4.jpg",
+    "https://i.ibb.co/39yvQZQJ/img5.jpg",
+    "https://i.ibb.co/Q7HvYT46/img6.jpg",
   ]
 };
