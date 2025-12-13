@@ -1,22 +1,20 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Calendar, MapPin, User, Smartphone } from 'lucide-react';
+import { ArrowRight, Calendar, MapPin, User, Smartphone, Lock } from 'lucide-react';
 import Logo from '../components/ui/Logo';
 import Button from '../components/ui/Button';
 import { ClientData } from '../types';
 import { fadeInUp, staggerContainer } from '../lib/animations';
 
 interface WelcomeViewProps {
-  onStart: (data: ClientData) => void; // Função chamada ao enviar o formulário
+  onStart: (data: ClientData) => void;
+  onAdminClick: () => void;
 }
 
 /**
  * Tela de Boas-Vindas (Landing Page)
- * ----------------------------------
- * Responsável por causar a primeira impressão e coletar dados básicos.
  */
-const WelcomeView: React.FC<WelcomeViewProps> = ({ onStart }) => {
-  // Estado que armazena os dados do formulário
+const WelcomeView: React.FC<WelcomeViewProps> = ({ onStart, onAdminClick }) => {
   const [formData, setFormData] = useState<ClientData>({
     name: '',
     location: '',
@@ -24,12 +22,10 @@ const WelcomeView: React.FC<WelcomeViewProps> = ({ onStart }) => {
     contact: ''
   });
 
-  // Atualiza o estado conforme o usuário digita
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Envia os dados para o componente pai (App.tsx)
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.name && formData.contact) {
@@ -40,10 +36,21 @@ const WelcomeView: React.FC<WelcomeViewProps> = ({ onStart }) => {
   return (
     <div className="w-full h-screen flex flex-col items-center justify-center bg-neutral-950 relative overflow-hidden px-6">
       
-      {/* Background Decorativo (Luzes e Gradientes) */}
+      {/* Background Decorativo */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-neutral-900 via-neutral-950 to-black z-0" />
-      {/* Orb de luz vermelha no fundo */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-brand-DEFAULT/5 rounded-full blur-[150px] pointer-events-none" />
+
+      {/* Botão Admin (Discreto no canto superior direito) */}
+      <motion.button
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.3 }}
+        whileHover={{ opacity: 1, scale: 1.1 }}
+        onClick={onAdminClick}
+        className="absolute top-6 right-6 z-50 text-white p-2"
+        title="Área Administrativa"
+      >
+        <Lock size={16} />
+      </motion.button>
 
       <motion.div 
         variants={staggerContainer}
@@ -51,13 +58,10 @@ const WelcomeView: React.FC<WelcomeViewProps> = ({ onStart }) => {
         animate="visible"
         className="relative z-10 w-full max-w-md"
       >
-        {/* LOGO DA EMPRESA */}
         <div className="flex justify-center mb-12">
-          {/* Ajuste o w-48 ou w-64 para mudar o tamanho da logo na capa */}
           <Logo className="w-64 md:w-80" animate />
         </div>
 
-        {/* FORMULÁRIO */}
         <motion.form 
           variants={fadeInUp}
           onSubmit={handleSubmit}
@@ -68,7 +72,6 @@ const WelcomeView: React.FC<WelcomeViewProps> = ({ onStart }) => {
           </div>
 
           <div className="space-y-5">
-            {/* Campo: Nome */}
             <div className="group relative">
               <User className="absolute left-0 top-3 text-neutral-500 group-focus-within:text-brand-DEFAULT transition-colors" size={20} />
               <input 
@@ -82,7 +85,6 @@ const WelcomeView: React.FC<WelcomeViewProps> = ({ onStart }) => {
               />
             </div>
 
-            {/* Campo: Local */}
             <div className="group relative">
               <MapPin className="absolute left-0 top-3 text-neutral-500 group-focus-within:text-brand-DEFAULT transition-colors" size={20} />
               <input 
@@ -95,7 +97,6 @@ const WelcomeView: React.FC<WelcomeViewProps> = ({ onStart }) => {
               />
             </div>
 
-            {/* Campo: Data (CORRIGIDO) */}
             <div className="group relative">
               <Calendar className="absolute left-0 top-3 text-neutral-500 group-focus-within:text-brand-DEFAULT transition-colors" size={20} />
               <input 
@@ -104,14 +105,11 @@ const WelcomeView: React.FC<WelcomeViewProps> = ({ onStart }) => {
                 required
                 value={formData.date}
                 onChange={handleChange}
-                // 'color-scheme: dark' força o ícone de calendário do navegador a ser branco (dark mode)
-                // 'appearance-none' remove estilos padrão feios
                 style={{ colorScheme: 'dark' }}
                 className="w-full bg-transparent border-b border-white/20 py-3 pl-8 text-white focus:outline-none focus:border-brand-DEFAULT transition-colors placeholder:text-neutral-600 [&::-webkit-calendar-picker-indicator]:opacity-60 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
               />
             </div>
 
-            {/* Campo: Contato */}
             <div className="group relative">
               <Smartphone className="absolute left-0 top-3 text-neutral-500 group-focus-within:text-brand-DEFAULT transition-colors" size={20} />
               <input 

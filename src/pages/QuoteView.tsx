@@ -1,28 +1,28 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import Hero from '../components/quote/Hero';
 import Moodboard from '../components/quote/Moodboard';
 import UpsellList from '../components/quote/UpsellList';
 import StickyFooter from '../components/quote/StickyFooter';
 import SignatureModal from '../components/quote/SignatureModal';
-import { mockQuote } from '../data/mock';
 import { formatCurrency } from '../lib/utils';
 import { motion } from 'framer-motion';
 import { OccasionType, LocationType, ClientData, QuoteData } from '../types';
 
 interface QuoteViewProps {
   clientData: ClientData;
+  config: QuoteData; // Recebe a configuração atualizada do App
 }
 
-const QuoteView: React.FC<QuoteViewProps> = ({ clientData }) => {
-  // Merge dos dados do cliente com o Mock (Template)
+const QuoteView: React.FC<QuoteViewProps> = ({ clientData, config }) => {
+  // Merge dos dados do cliente com a Configuração atual (Preços dinâmicos)
   const quoteData: QuoteData = useMemo(() => ({
-    ...mockQuote,
+    ...config, // Usa os preços passados via prop (podem ter sido editados no Admin)
     client: {
-        ...mockQuote.client,
+        ...config.client,
         ...clientData,
         projectTitle: `Project: ${clientData.name}`
     }
-  }), [clientData]);
+  }), [clientData, config]);
 
   // Estados do Configurador
   const [occasion, setOccasion] = useState<OccasionType>('advertising');
@@ -55,10 +55,8 @@ const QuoteView: React.FC<QuoteViewProps> = ({ clientData }) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Helper para formatar data corrigindo Timezone (Evita que caia no dia anterior)
   const formatDateSafe = (dateString: string) => {
     if (!dateString) return 'A definir';
-    // Adiciona meio-dia para evitar problemas de UTC-3 (Brasil) virando dia anterior
     const date = new Date(`${dateString}T12:00:00`);
     return date.toLocaleDateString('pt-BR');
   };
@@ -88,7 +86,6 @@ const QuoteView: React.FC<QuoteViewProps> = ({ clientData }) => {
 
         <Moodboard images={quoteData.moodboardImages} />
         
-        {/* Novo Configurador */}
         <UpsellList 
           data={quoteData}
           occasion={occasion}

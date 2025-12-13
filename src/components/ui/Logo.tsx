@@ -2,35 +2,47 @@ import React from 'react';
 import { motion, Variants } from 'framer-motion';
 import { cn } from '../../lib/utils';
 
-// NOTE: We cannot import images directly in native ESM (browser) without a bundler loader.
-// We reference the file by its serving path. 
-// Ensure 'src/assets/logo.png' exists in your project structure.
-const logoSrc = './src/assets/logo.png'; 
+// DEFINIÇÃO DO CAMINHO DA IMAGEM
+// ---------------------------------------------------------------------------
+// Usamos um caminho absoluto (começando com /) para referenciar a imagem.
+// Isso funciona porque a pasta 'src' é servida publicamente pelo servidor de desenvolvimento.
+// O erro anterior "Invalid URL" ocorria ao tentar usar 'new URL()' com 'import.meta.url'
+// em ambientes que não suportam essa funcionalidade nativamente.
+const logoSrc = '/src/assets/logo.png';
 
 interface LogoProps {
-  className?: string; // Classes CSS extras para tamanho (w-*, h-*)
-  animate?: boolean;  // Se true, anima a entrada da logo
+  className?: string; // Classes CSS opcionais para ajustar tamanho (ex: w-32, h-auto)
+  animate?: boolean;  // Se 'true', ativa a animação de entrada (fade-in + scale)
 }
 
 /**
- * Componente de Logo
- * ------------------
- * Exibe a imagem da marca.
- * Para alterar o tamanho, passe classes via props (ex: className="w-32").
+ * Componente: Logo
+ * ----------------
+ * Responsável por renderizar a marca da empresa.
+ * Possui tratamento de erro caso a imagem não seja encontrada e suporte a animações.
  */
 const Logo: React.FC<LogoProps> = ({ className, animate = false }) => {
   
-  // Configuração da animação (Framer Motion)
+  // Configuração das animações usando a biblioteca Framer Motion
   const imageVariants: Variants = {
-    hidden: { opacity: 0, scale: 0.8, filter: 'blur(10px)' },
+    hidden: { 
+      opacity: 0, 
+      scale: 0.8, 
+      filter: 'blur(10px)' // Começa invisível, menor e desfocado
+    },
     visible: { 
       opacity: 1, 
       scale: 1, 
-      filter: 'blur(0px)',
-      transition: { duration: 1.2, ease: [0.22, 1, 0.36, 1] } 
+      filter: 'blur(0px)', // Termina visível, tamanho normal e nítido
+      transition: { 
+        duration: 1.2, 
+        ease: [0.22, 1, 0.36, 1] // Curva de animação suave (cinematográfica)
+      } 
     }
   };
 
+  // RENDERIZAÇÃO SEM ANIMAÇÃO
+  // Usada no cabeçalho ou onde a logo deve aparecer instantaneamente.
   if (!animate) {
     return (
       <div className={cn("relative select-none", className)}>
@@ -39,8 +51,9 @@ const Logo: React.FC<LogoProps> = ({ className, animate = false }) => {
           alt="EAREC Logo" 
           className="w-full h-auto object-contain"
           onError={(e) => {
-            // Fallback visual caso a imagem não carregue
-            console.warn("Logo image failed to load at", logoSrc);
+            // Caso a imagem não carregue (arquivo faltando), avisa no console
+            console.warn("A imagem da logo falhou ao carregar em:", logoSrc);
+            // Opcional: Diminui a opacidade para indicar erro visualmente sem quebrar o layout
             e.currentTarget.style.opacity = '0.5';
           }}
         />
@@ -48,6 +61,8 @@ const Logo: React.FC<LogoProps> = ({ className, animate = false }) => {
     );
   }
 
+  // RENDERIZAÇÃO COM ANIMAÇÃO
+  // Usada na tela de boas-vindas (WelcomeView) para impacto visual.
   return (
     <motion.div 
       initial="hidden"
@@ -58,9 +73,10 @@ const Logo: React.FC<LogoProps> = ({ className, animate = false }) => {
       <img 
         src={logoSrc} 
         alt="EAREC Logo" 
+        // Adiciona uma sombra suave (drop-shadow) para destacar do fundo escuro
         className="w-full h-auto object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]"
         onError={(e) => {
-           console.warn("Logo image failed to load at", logoSrc);
+           console.warn("A imagem da logo falhou ao carregar em:", logoSrc);
         }}
       />
     </motion.div>
