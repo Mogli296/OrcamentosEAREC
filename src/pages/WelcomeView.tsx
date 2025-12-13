@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { ArrowRight, Calendar, MapPin, User, Smartphone, Lock } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowRight, Calendar, MapPin, User, Smartphone, Lock, CheckCircle2 } from 'lucide-react';
 import Logo from '../components/ui/Logo';
 import Button from '../components/ui/Button';
 import { ClientData } from '../types';
@@ -33,6 +33,23 @@ const WelcomeView: React.FC<WelcomeViewProps> = ({ onStart, onAdminClick }) => {
     }
   };
 
+  // Helper para renderizar o ícone de sucesso
+  const SuccessIcon = ({ show }: { show: boolean }) => (
+    <AnimatePresence>
+      {show && (
+        <motion.div
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0, opacity: 0 }}
+          transition={{ type: "spring", stiffness: 400, damping: 15 }}
+          className="absolute right-0 top-3 text-emerald-500 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]"
+        >
+          <CheckCircle2 size={20} />
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+
   return (
     <div className="w-full h-screen flex flex-col items-center justify-center bg-neutral-950 relative overflow-hidden px-6">
       
@@ -59,14 +76,18 @@ const WelcomeView: React.FC<WelcomeViewProps> = ({ onStart, onAdminClick }) => {
         className="relative z-10 w-full max-w-md"
       >
         <div className="flex justify-center mb-12">
+          {/* Logo agora usa SVG interno, não precisa de arquivo externo */}
           <Logo className="w-64 md:w-80" animate />
         </div>
 
         <motion.form 
           variants={fadeInUp}
           onSubmit={handleSubmit}
-          className="space-y-8 bg-white/5 p-8 rounded-2xl border border-white/5 backdrop-blur-md shadow-2xl"
+          className="space-y-8 bg-white/5 p-8 rounded-2xl border border-white/5 backdrop-blur-md shadow-2xl relative"
         >
+          {/* Borda superior brilhante sutil */}
+          <div className="absolute top-0 left-8 right-8 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+
           <div className="space-y-2">
             <h2 className="text-xl text-white font-medium text-center mb-6">Iniciar Novo Projeto</h2>
           </div>
@@ -81,8 +102,9 @@ const WelcomeView: React.FC<WelcomeViewProps> = ({ onStart, onAdminClick }) => {
                 placeholder="Seu Nome ou Empresa"
                 value={formData.name}
                 onChange={handleChange}
-                className="w-full bg-transparent border-b border-white/20 py-3 pl-8 text-white focus:outline-none focus:border-brand-DEFAULT transition-colors placeholder:text-neutral-600"
+                className="w-full bg-transparent border-b border-white/20 py-3 pl-8 pr-8 text-white focus:outline-none focus:border-brand-DEFAULT transition-colors placeholder:text-neutral-600"
               />
+              <SuccessIcon show={formData.name.length > 2} />
             </div>
 
             <div className="group relative">
@@ -93,8 +115,9 @@ const WelcomeView: React.FC<WelcomeViewProps> = ({ onStart, onAdminClick }) => {
                 placeholder="Cidade / Local do Evento"
                 value={formData.location}
                 onChange={handleChange}
-                className="w-full bg-transparent border-b border-white/20 py-3 pl-8 text-white focus:outline-none focus:border-brand-DEFAULT transition-colors placeholder:text-neutral-600"
+                className="w-full bg-transparent border-b border-white/20 py-3 pl-8 pr-8 text-white focus:outline-none focus:border-brand-DEFAULT transition-colors placeholder:text-neutral-600"
               />
+              <SuccessIcon show={formData.location.length > 3} />
             </div>
 
             <div className="group relative">
@@ -106,8 +129,9 @@ const WelcomeView: React.FC<WelcomeViewProps> = ({ onStart, onAdminClick }) => {
                 value={formData.date}
                 onChange={handleChange}
                 style={{ colorScheme: 'dark' }}
-                className="w-full bg-transparent border-b border-white/20 py-3 pl-8 text-white focus:outline-none focus:border-brand-DEFAULT transition-colors placeholder:text-neutral-600 [&::-webkit-calendar-picker-indicator]:opacity-60 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                className="w-full bg-transparent border-b border-white/20 py-3 pl-8 pr-8 text-white focus:outline-none focus:border-brand-DEFAULT transition-colors placeholder:text-neutral-600 [&::-webkit-calendar-picker-indicator]:opacity-60 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
               />
+              <SuccessIcon show={!!formData.date} />
             </div>
 
             <div className="group relative">
@@ -119,8 +143,9 @@ const WelcomeView: React.FC<WelcomeViewProps> = ({ onStart, onAdminClick }) => {
                 placeholder="Whatsapp ou Email"
                 value={formData.contact}
                 onChange={handleChange}
-                className="w-full bg-transparent border-b border-white/20 py-3 pl-8 text-white focus:outline-none focus:border-brand-DEFAULT transition-colors placeholder:text-neutral-600"
+                className="w-full bg-transparent border-b border-white/20 py-3 pl-8 pr-8 text-white focus:outline-none focus:border-brand-DEFAULT transition-colors placeholder:text-neutral-600"
               />
+              <SuccessIcon show={formData.contact.length > 5} />
             </div>
           </div>
 

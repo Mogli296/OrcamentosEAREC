@@ -2,14 +2,6 @@ import React from 'react';
 import { motion, Variants } from 'framer-motion';
 import { cn } from '../../lib/utils';
 
-// DEFINIÇÃO DO CAMINHO DA IMAGEM
-// ---------------------------------------------------------------------------
-// Usamos um caminho absoluto (começando com /) para referenciar a imagem.
-// Isso funciona porque a pasta 'src' é servida publicamente pelo servidor de desenvolvimento.
-// O erro anterior "Invalid URL" ocorria ao tentar usar 'new URL()' com 'import.meta.url'
-// em ambientes que não suportam essa funcionalidade nativamente.
-const logoSrc = './src/assets/logo.png';
-
 interface LogoProps {
   className?: string; // Classes CSS opcionais para ajustar tamanho (ex: w-32, h-auto)
   animate?: boolean;  // Se 'true', ativa a animação de entrada (fade-in + scale)
@@ -18,67 +10,92 @@ interface LogoProps {
 /**
  * Componente: Logo
  * ----------------
- * Responsável por renderizar a marca da empresa.
- * Possui tratamento de erro caso a imagem não seja encontrada e suporte a animações.
+ * Renderiza a marca EAREC vetorialmente (SVG).
+ * Design: "EA" (Branco/Cinza) + Dot (Vermelho) + "REC" (Vermelho).
+ * Elimina dependência de arquivos de imagem externos.
  */
 const Logo: React.FC<LogoProps> = ({ className, animate = false }) => {
   
-  // Configuração das animações usando a biblioteca Framer Motion
-  const imageVariants: Variants = {
+  const containerVariants: Variants = {
     hidden: { 
       opacity: 0, 
       scale: 0.8, 
-      filter: 'blur(10px)' // Começa invisível, menor e desfocado
+      filter: 'blur(10px)' 
     },
     visible: { 
       opacity: 1, 
       scale: 1, 
-      filter: 'blur(0px)', // Termina visível, tamanho normal e nítido
+      filter: 'blur(0px)',
       transition: { 
         duration: 1.2, 
-        ease: [0.22, 1, 0.36, 1] // Curva de animação suave (cinematográfica)
+        ease: [0.22, 1, 0.36, 1] 
       } 
     }
   };
 
-  // RENDERIZAÇÃO SEM ANIMAÇÃO
-  // Usada no cabeçalho ou onde a logo deve aparecer instantaneamente.
+  const SvgContent = () => (
+    <svg 
+      viewBox="0 0 250 70" 
+      fill="none" 
+      xmlns="http://www.w3.org/2000/svg" 
+      className="w-full h-full drop-shadow-[0_0_15px_rgba(255,255,255,0.05)]"
+      aria-label="EAREC Logo"
+    >
+      {/* Texto EA - Cinza Claro/Branco */}
+      <text 
+        x="10" 
+        y="52" 
+        fontFamily="'Inter', sans-serif" 
+        fontWeight="800" 
+        fontSize="55" 
+        fill="#E5E5E5" 
+        letterSpacing="-3"
+        className="drop-shadow-sm"
+      >
+        EA
+      </text>
+
+      {/* Ponto Central - Vermelho Marca */}
+      <circle 
+        cx="105" 
+        cy="36" 
+        r="7" 
+        fill="#DC2626" 
+        className="drop-shadow-[0_0_8px_rgba(220,38,38,0.8)]"
+      />
+
+      {/* Texto REC - Vermelho Marca */}
+      <text 
+        x="125" 
+        y="52" 
+        fontFamily="'Inter', sans-serif" 
+        fontWeight="800" 
+        fontSize="55" 
+        fill="#DC2626" 
+        letterSpacing="-3"
+        className="drop-shadow-[0_0_5px_rgba(220,38,38,0.4)]"
+      >
+        REC
+      </text>
+    </svg>
+  );
+
   if (!animate) {
     return (
       <div className={cn("relative select-none", className)}>
-        <img 
-          src={logoSrc} 
-          alt="EAREC Logo" 
-          className="w-full h-auto object-contain"
-          onError={(e) => {
-            // Caso a imagem não carregue (arquivo faltando), avisa no console
-            console.warn("A imagem da logo falhou ao carregar em:", logoSrc);
-            // Opcional: Diminui a opacidade para indicar erro visualmente sem quebrar o layout
-            e.currentTarget.style.opacity = '0.5';
-          }}
-        />
+        <SvgContent />
       </div>
     );
   }
 
-  // RENDERIZAÇÃO COM ANIMAÇÃO
-  // Usada na tela de boas-vindas (WelcomeView) para impacto visual.
   return (
     <motion.div 
       initial="hidden"
       animate="visible"
-      variants={imageVariants}
+      variants={containerVariants}
       className={cn("relative select-none", className)}
     >
-      <img 
-        src={logoSrc} 
-        alt="EAREC Logo" 
-        // Adiciona uma sombra suave (drop-shadow) para destacar do fundo escuro
-        className="w-full h-auto object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]"
-        onError={(e) => {
-           console.warn("A imagem da logo falhou ao carregar em:", logoSrc);
-        }}
-      />
+      <SvgContent />
     </motion.div>
   );
 };

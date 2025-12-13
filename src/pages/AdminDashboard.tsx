@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Lock, Save, ArrowLeft, DollarSign, LogOut } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Lock, Save, DollarSign, LogOut, ShieldAlert, Loader2, KeyRound } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Logo from '../components/ui/Logo';
 import { QuoteData } from '../types';
 import { fadeInUp, staggerContainer } from '../lib/animations';
 import { formatCurrency } from '../lib/utils';
+import { verifyPassword, securityDelay } from '../lib/security';
 
 interface AdminDashboardProps {
   currentConfig: QuoteData;
@@ -17,7 +18,27 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentConfig, onUpdate
   // Estado de Autenticação
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
+  
+  // Estados de Segurança e Feedback
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [attempts, setAttempts] = useState(0);
+  const [isLocked, setIsLocked] = useState(false);
+  const [lockTimer, setLockTimer] = useState(0);
+
+  // Efeito para gerenciar o cronômetro de bloqueio (Rate Limiting)
+  useEffect(() => {
+    let interval: ReturnType<typeof setInterval>;
+    if (isLocked && lockTimer > 0) {
+      interval = setInterval(() => {
+        setLockTimer((prev) => prev - 1);
+      }, 1000);
+    } else if (lockTimer === 0) {
+      setIsLocked(false);
+      setAttempts(0); // Reseta tentativas após o bloqueio expirar
+    }
+    return () => clearInterval(interval);
+  }, [isLocked, lockTimer]);
 
   // Estado do Formulário de Edição
   const [formData, setFormData] = useState({
@@ -27,15 +48,40 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentConfig, onUpdate
     videoUnitPrice: currentConfig.videoUnitPrice,
   });
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === 'xingu') {
+    
+    // Se estiver bloqueado, não processa
+    if (isLocked) return;
+
+    setError('');
+    setIsLoading(true);
+
+    // Adiciona delay artificial para desencorajar ataques de força bruta rápidos
+    await securityDelay();
+
+    const isValid = await verifyPassword(password);
+
+    if (isValid) {
       setIsAuthenticated(true);
       setError('');
     } else {
-      setError('Acesso negado. Senha incorreta.');
+      const newAttempts = attempts + 1;
+      setAttempts(newAttempts);
+      setIsLoading(false);
       setPassword('');
+
+      // Lógica de Bloqueio (3 tentativas erradas)
+      if (newAttempts >= 3) {
+        setIsLocked(true);
+        setLockTimer(30); // Bloqueia por 30 segundos
+        setError(`Muitas tentativas. Bloqueado por 30s.`);
+      } else {
+        setError(`Senha incorreta. Tentativas restantes: ${3 - newAttempts}`);
+      }
     }
+    
+    setIsLoading(false);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -51,42 +97,81 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentConfig, onUpdate
       ...currentConfig,
       ...formData
     });
-    alert('Configurações salvas com sucesso!');
+    // Feedback visual simples usando alert nativo (pode ser melhorado para um Toast)
+    alert('Configurações salvas com segurança!');
   };
 
-  // TELA DE LOGIN
+  // TELA DE LOGIN (SECURE GATE)
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-neutral-950 flex flex-col items-center justify-center p-6 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-neutral-900 via-neutral-950 to-black z-0" />
+        {/* Fundo dinâmico indicando estado de alerta se houver erro */}
+        <div className={`absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] transition-colors duration-1000 ${isLocked ? 'from-red-900/20 via-neutral-950 to-black' : 'from-neutral-900 via-neutral-950 to-black'} z-0`} />
         
         <motion.div 
           initial="hidden"
           animate="visible"
           variants={staggerContainer}
-          className="relative z-10 w-full max-w-sm bg-neutral-900/50 border border-white/5 p-8 rounded-2xl backdrop-blur-xl"
+          className="relative z-10 w-full max-w-sm bg-neutral-900/80 border border-white/5 p-8 rounded-2xl backdrop-blur-xl shadow-2xl"
         >
           <div className="flex justify-center mb-8">
-            <div className="p-4 bg-brand-DEFAULT/10 rounded-full text-brand-DEFAULT">
-              <Lock size={32} />
-            </div>
+            <AnimatePresence mode="wait">
+              {isLocked ? (
+                 <motion.div 
+                    key="locked"
+                    initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}
+                    className="p-4 bg-red-500/10 rounded-full text-red-500 shadow-[0_0_20px_rgba(220,38,38,0.2)]"
+                 >
+                    <ShieldAlert size={32} />
+                 </motion.div>
+              ) : (
+                <motion.div 
+                    key="normal"
+                    initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}
+                    className="p-4 bg-brand-DEFAULT/10 rounded-full text-brand-DEFAULT shadow-[0_0_20px_rgba(220,38,38,0.1)]"
+                >
+                    <Lock size={32} />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
           
-          <h2 className="text-2xl font-serif text-white text-center mb-2">Acesso Restrito</h2>
-          <p className="text-neutral-500 text-center text-sm mb-8">Área exclusiva para administradores.</p>
+          <h2 className="text-2xl font-serif text-white text-center mb-2">
+            {isLocked ? "Acesso Bloqueado" : "Acesso Restrito"}
+          </h2>
+          <p className="text-neutral-500 text-center text-sm mb-8">
+            {isLocked ? `Aguarde ${lockTimer}s para tentar novamente.` : "Área exclusiva para administradores."}
+          </p>
 
           <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-2">
+            <div className="space-y-2 relative">
+              <div className="absolute left-3 top-3.5 text-neutral-500">
+                <KeyRound size={18} />
+              </div>
               <input 
                 type="password" 
-                placeholder="Senha Mestre"
+                placeholder={isLocked ? "Bloqueado..." : "Senha Mestre"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-neutral-950 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-brand-DEFAULT focus:outline-none transition-colors"
+                disabled={isLoading || isLocked}
+                className={`w-full bg-neutral-950 border rounded-lg pl-10 pr-4 py-3 text-white transition-colors focus:outline-none
+                  ${error ? 'border-red-500/50 focus:border-red-500' : 'border-white/10 focus:border-brand-DEFAULT'}
+                  ${isLocked ? 'opacity-50 cursor-not-allowed' : ''}
+                `}
                 autoFocus
               />
-              {error && <p className="text-red-500 text-xs pl-1">{error}</p>}
             </div>
+
+            {error && (
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }} 
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-center gap-2 text-red-400 text-xs pl-1 bg-red-500/10 p-2 rounded"
+              >
+                <ShieldAlert size={12} />
+                <span>{error}</span>
+              </motion.div>
+            )}
             
             <div className="flex gap-3 pt-2">
                <Button 
@@ -94,20 +179,30 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentConfig, onUpdate
                 variant="secondary" 
                 className="w-1/3"
                 onClick={onExit}
+                disabled={isLoading}
                >
                  Voltar
                </Button>
-               <Button type="submit" className="w-2/3">
-                 Entrar
+               <Button 
+                type="submit" 
+                className="w-2/3 relative"
+                disabled={isLoading || isLocked}
+               >
+                 {isLoading ? <Loader2 className="animate-spin" size={20} /> : "Autenticar"}
                </Button>
             </div>
           </form>
         </motion.div>
+        
+        <div className="mt-8 text-neutral-600 text-xs flex flex-col items-center gap-1">
+            <p>Protected by SHA-256 Encryption</p>
+            <p className="opacity-50">EAREC Secure System v1.0.2</p>
+        </div>
       </div>
     );
   }
 
-  // TELA DE DASHBOARD
+  // TELA DE DASHBOARD (Acesso concedido)
   return (
     <div className="min-h-screen bg-neutral-950 text-white font-sans">
       {/* Header */}
@@ -115,15 +210,20 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentConfig, onUpdate
         <div className="max-w-5xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Logo className="w-24" />
-            <span className="h-6 w-px bg-white/10" />
-            <span className="text-sm font-medium text-neutral-400">Admin Dashboard</span>
+            <div className="hidden md:flex items-center gap-4">
+               <span className="h-6 w-px bg-white/10" />
+               <span className="text-sm font-medium text-neutral-400">Admin Mode</span>
+               <span className="text-xs bg-green-500/10 text-green-500 px-2 py-0.5 rounded border border-green-500/20 flex items-center gap-1">
+                 <Lock size={10} /> Secure Connection
+               </span>
+            </div>
           </div>
           <button 
             onClick={onExit}
-            className="flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors"
+            className="flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors border border-white/10 px-4 py-2 rounded-full hover:bg-white/5"
           >
             <LogOut size={16} />
-            Sair
+            Sair com Segurança
           </button>
         </div>
       </header>
@@ -144,7 +244,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentConfig, onUpdate
             </div>
           </div>
 
-          <div className="bg-white/5 border border-white/5 rounded-xl p-8 space-y-8">
+          <div className="bg-white/5 border border-white/5 rounded-xl p-8 space-y-8 shadow-inner">
             
             {/* Base Price */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-8 border-b border-white/5">
@@ -159,7 +259,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentConfig, onUpdate
                   name="basePrice"
                   value={formData.basePrice}
                   onChange={handleInputChange}
-                  className="w-full bg-neutral-950 border border-white/10 rounded px-4 py-2 text-white focus:border-brand-DEFAULT focus:outline-none"
+                  className="w-full bg-neutral-950 border border-white/10 rounded px-4 py-2 text-white focus:border-brand-DEFAULT focus:outline-none focus:ring-1 focus:ring-brand-DEFAULT transition-all"
                 />
               </div>
             </div>
@@ -177,7 +277,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentConfig, onUpdate
                   name="studioFee"
                   value={formData.studioFee}
                   onChange={handleInputChange}
-                  className="w-full bg-neutral-950 border border-white/10 rounded px-4 py-2 text-white focus:border-brand-DEFAULT focus:outline-none"
+                  className="w-full bg-neutral-950 border border-white/10 rounded px-4 py-2 text-white focus:border-brand-DEFAULT focus:outline-none focus:ring-1 focus:ring-brand-DEFAULT transition-all"
                 />
               </div>
             </div>
@@ -195,7 +295,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentConfig, onUpdate
                   name="photoUnitPrice"
                   value={formData.photoUnitPrice}
                   onChange={handleInputChange}
-                  className="w-full bg-neutral-950 border border-white/10 rounded px-4 py-2 text-white focus:border-brand-DEFAULT focus:outline-none"
+                  className="w-full bg-neutral-950 border border-white/10 rounded px-4 py-2 text-white focus:border-brand-DEFAULT focus:outline-none focus:ring-1 focus:ring-brand-DEFAULT transition-all"
                 />
               </div>
             </div>
@@ -213,7 +313,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentConfig, onUpdate
                   name="videoUnitPrice"
                   value={formData.videoUnitPrice}
                   onChange={handleInputChange}
-                  className="w-full bg-neutral-950 border border-white/10 rounded px-4 py-2 text-white focus:border-brand-DEFAULT focus:outline-none"
+                  className="w-full bg-neutral-950 border border-white/10 rounded px-4 py-2 text-white focus:border-brand-DEFAULT focus:outline-none focus:ring-1 focus:ring-brand-DEFAULT transition-all"
                 />
               </div>
             </div>
@@ -222,7 +322,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentConfig, onUpdate
 
           <div className="mt-8 flex justify-end gap-4">
             <Button variant="secondary" onClick={onExit}>
-              Cancelar e Sair
+              Cancelar
             </Button>
             <Button onClick={handleSave} className="flex items-center gap-2">
               <Save size={18} />
