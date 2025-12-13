@@ -17,18 +17,25 @@ import { QuoteData, OccasionType, LocationType } from '../../types';
 import { formatCurrency, cn } from '../../lib/utils';
 import { fadeInUp, staggerContainer } from '../../lib/animations';
 
+// Tipagem das Props recebidas do componente pai (QuoteView)
 interface ConfiguratorProps {
-  data: QuoteData;
-  occasion: OccasionType;
+  data: QuoteData; // Dados base de preços
+  occasion: OccasionType; // Estado atual da ocasião
   setOccasion: (o: OccasionType) => void;
-  location: LocationType;
+  location: LocationType; // Estado atual do local
   setLocation: (l: LocationType) => void;
-  photoQty: number;
+  photoQty: number; // Quantidade de fotos
   setPhotoQty: (n: number) => void;
-  videoQty: number;
+  videoQty: number; // Quantidade de vídeos
   setVideoQty: (n: number) => void;
 }
 
+/**
+ * Componente Configurador (UpsellList)
+ * ------------------------------------
+ * O coração da venda. Aqui o cliente interage com os parâmetros
+ * que alteram o preço final.
+ */
 const UpsellList: React.FC<ConfiguratorProps> = ({ 
   data,
   occasion, setOccasion,
@@ -37,7 +44,8 @@ const UpsellList: React.FC<ConfiguratorProps> = ({
   videoQty, setVideoQty
 }) => {
 
-  // Definição das Ocasiões
+  // CONFIGURAÇÃO DAS OCASIÕES
+  // Para adicionar uma nova ocasião, adicione um objeto aqui e atualize o tipo OccasionType.
   const occasions = [
     { id: 'institutional', label: 'Institucional', icon: Briefcase, desc: 'Corporativo & Marca' },
     { id: 'advertising', label: 'Publicidade', icon: Megaphone, desc: 'Comercial & Vendas' },
@@ -47,12 +55,12 @@ const UpsellList: React.FC<ConfiguratorProps> = ({
 
   return (
     <section className="py-24 px-6 md:px-12 bg-neutral-900/30 border-y border-white/5 relative overflow-hidden">
-      {/* Background Decorativo */}
+      {/* Background Decorativo (Luzes de fundo) */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-DEFAULT/5 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="max-w-5xl mx-auto space-y-20 relative z-10">
         
-        {/* Header */}
+        {/* Cabeçalho da Seção */}
         <motion.div 
           initial="hidden"
           whileInView="visible"
@@ -64,7 +72,7 @@ const UpsellList: React.FC<ConfiguratorProps> = ({
           <motion.p variants={fadeInUp} className="text-neutral-400">Personalize o escopo para atender às necessidades do projeto.</motion.p>
         </motion.div>
 
-        {/* 1. SELEÇÃO DE OCASIÃO */}
+        {/* 1. SELEÇÃO DE OCASIÃO (Grid de botões) */}
         <div className="space-y-6">
             <h3 className="text-xs uppercase tracking-widest text-white/40 font-semibold border-l-2 border-brand-DEFAULT pl-3">
                 01. Ocasião do Projeto
@@ -95,7 +103,7 @@ const UpsellList: React.FC<ConfiguratorProps> = ({
             </div>
         </div>
 
-        {/* 2. SELEÇÃO DE LOCAL */}
+        {/* 2. SELEÇÃO DE LOCAL (Cards grandes) */}
         <div className="space-y-6">
             <h3 className="text-xs uppercase tracking-widest text-white/40 font-semibold border-l-2 border-brand-DEFAULT pl-3">
                 02. Ambiente & Logística
@@ -135,13 +143,14 @@ const UpsellList: React.FC<ConfiguratorProps> = ({
                     <div>
                         <h4 className="text-xl font-serif text-white">Estúdio Controlado</h4>
                         <p className="text-sm text-neutral-400 mt-1">Fundo infinito, iluminação de cinema e estrutura completa.</p>
+                        {/* Exibe o preço extra vindo do mock.ts */}
                         <span className="text-xs text-white/60 mt-2 block font-medium">+ {formatCurrency(data.studioFee)} (Taxa de Locação)</span>
                     </div>
                 </motion.div>
             </div>
         </div>
 
-        {/* 3. ENTREGÁVEIS (COUNTERS) */}
+        {/* 3. ENTREGÁVEIS (Contadores +/-) */}
         <div className="space-y-6">
             <h3 className="text-xs uppercase tracking-widest text-white/40 font-semibold border-l-2 border-brand-DEFAULT pl-3">
                 03. Volume de Entregáveis
@@ -198,7 +207,7 @@ const UpsellList: React.FC<ConfiguratorProps> = ({
             </div>
         </div>
 
-        {/* 4. ITENS INCLUSOS */}
+        {/* 4. ITENS INCLUSOS (Estática) */}
         <div className="bg-white/5 rounded-lg p-8 border border-white/5">
             <h3 className="font-serif text-2xl text-white mb-6 flex items-center gap-3">
                 <Sparkles className="text-brand-DEFAULT" size={20} />

@@ -6,20 +6,30 @@ import { QuoteData } from '../../types';
 import Logo from '../ui/Logo';
 
 interface HeroProps {
-  data: QuoteData;
+  data: QuoteData; // Recebe os dados do orçamento (incluindo nome do cliente)
 }
 
+/**
+ * Componente Hero
+ * ---------------
+ * A "capa" da proposta. Deve ser impactante.
+ * Exibe a imagem de fundo, o logo e a saudação personalizada.
+ */
 const Hero: React.FC<HeroProps> = ({ data }) => {
   return (
     <section className="relative w-full h-screen overflow-hidden flex items-center justify-center">
-      {/* Background Cinematográfico */}
+      
+      {/* BACKGROUND CINEMATOGRÁFICO */}
       <motion.div 
         variants={scaleIn}
         initial="hidden"
         animate="visible"
         className="absolute inset-0 z-0"
       >
+        {/* Overlay Escuro para garantir leitura do texto */}
         <div className="absolute inset-0 bg-gradient-to-b from-neutral-950/30 via-neutral-950/70 to-neutral-950 z-10" />
+        
+        {/* Imagem de Fundo (Altere a URL abaixo para mudar a imagem da capa) */}
         <img 
           src="https://picsum.photos/id/42/1920/1080" 
           alt="Cinematic Background" 
@@ -27,19 +37,23 @@ const Hero: React.FC<HeroProps> = ({ data }) => {
         />
       </motion.div>
 
-      {/* Conteúdo de Texto */}
+      {/* CONTEÚDO CENTRAL */}
       <motion.div 
         variants={staggerContainer}
         initial="hidden"
         animate="visible"
         className="relative z-20 text-center px-6 max-w-5xl"
       >
+        {/* Logo EAREC */}
         <motion.div variants={fadeInUp} className="mb-6 flex justify-center">
-            <Logo className="text-6xl md:text-8xl scale-125" />
+            {/* Ajuste 'w-64' ou 'w-80' para mudar tamanho da logo */}
+            <Logo className="w-64 md:w-96" />
         </motion.div>
         
+        {/* Linha Divisória Vermelha (Brand Color) */}
         <motion.div variants={fadeInUp} className="w-16 h-1 bg-brand-DEFAULT mx-auto my-8 shadow-[0_0_15px_#DC2626]" />
 
+        {/* Saudação Personalizada */}
         <motion.h1 variants={fadeInUp} className="text-3xl md:text-5xl text-white font-light mb-4 tracking-wide leading-tight">
           Olá, <span className="font-semibold">{data.client.name}</span>.
         </motion.h1>
@@ -50,7 +64,7 @@ const Hero: React.FC<HeroProps> = ({ data }) => {
         </motion.p>
       </motion.div>
 
-      {/* Scroll Indicator */}
+      {/* Indicador de Scroll (Seta pulando) */}
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}

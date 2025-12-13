@@ -55,6 +55,14 @@ const QuoteView: React.FC<QuoteViewProps> = ({ clientData }) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Helper para formatar data corrigindo Timezone (Evita que caia no dia anterior)
+  const formatDateSafe = (dateString: string) => {
+    if (!dateString) return 'A definir';
+    // Adiciona meio-dia para evitar problemas de UTC-3 (Brasil) virando dia anterior
+    const date = new Date(`${dateString}T12:00:00`);
+    return date.toLocaleDateString('pt-BR');
+  };
+
   return (
     <div className="pb-32 relative">
       <Hero data={quoteData} />
@@ -98,7 +106,7 @@ const QuoteView: React.FC<QuoteViewProps> = ({ clientData }) => {
            <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-neutral-500 text-sm">
               <div>
                   <h5 className="text-white mb-2 font-medium">Data Alvo</h5>
-                  <p>{clientData.date ? new Date(clientData.date).toLocaleDateString('pt-BR') : 'A definir'}</p>
+                  <p>{formatDateSafe(clientData.date)}</p>
                   <p>Produção: 1 Diária</p>
                   <p>Contato: {clientData.contact}</p>
               </div>
