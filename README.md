@@ -19,7 +19,7 @@ Uma plataforma de orçamentos projetada para encantar clientes premium. Muito al
 *   **🎬 Cinematic UX:** Animações fluidas, transições de estado, feedback tátil e visual rico.
 *   **💰 Precificação Dinâmica:** Motor de cálculo em tempo real que considera tipo de evento, horas, quantidade de mídia e adicionais.
 *   **🗺️ Logística Inteligente:** Integração com OpenStreetMap (Nominatim) para cálculo automático de frete baseado na distância real de condução.
-*   **📅 Validação de Agenda:** Integração opcional com Google Calendar para verificação de disponibilidade.
+*   **📅 Validação de Agenda:** Integração segura com Google Calendar (suporte a .env).
 *   **🔐 Painel Administrativo:** Área segura para ajuste de preços base sem necessidade de deploy.
 *   **📱 Mobile First:** Design responsivo e otimizado para qualquer dispositivo.
 
@@ -37,11 +37,12 @@ src/
 │   ├── quote/            # Componentes de Negócio (Lógica de Venda)
 │   │   ├── UpsellList    # Seletor visual de serviços e adicionais
 │   │   ├── StickyFooter  # Barra de totalização e ação
-│   │   └── Hero          # Cabeçalho imersivo com vídeo
+│   │   ├── Hero          # Cabeçalho imersivo com vídeo
+│   │   └── Moodboard     # Galeria visual (Parallax)
 │   └── ui/               # Design System (Botões, Inputs, Logos)
 │
 ├── data/                 # Camada de Dados
-│   └── mock.ts           # Configurações iniciais, chaves de API e preços default
+│   └── mock.ts           # Configurações iniciais e preços default
 │
 ├── lib/                  # Utilitários e Lógica Pura
 │   ├── maps.ts           # Algoritmo de geocoding e cálculo de distância (Haversine)
@@ -89,14 +90,21 @@ git clone https://github.com/seu-usuario/earec-proposals.git
 npm install
 
 # Inicie o servidor de desenvolvimento
-npm start
+npm run dev
 ```
 
-### Configuração de APIs
+### Configuração de APIs (Segurança)
 
-Para habilitar recursos avançados, edite o arquivo `src/data/mock.ts`:
+Nunca insira chaves de API diretamente no código fonte. Para habilitar recursos reais, utilize variáveis de ambiente.
 
-*   **Google Calendar:** Preencha `apiKey` e `calendarId` para ativar a verificação real de datas.
+Crie um arquivo `.env` na raiz do projeto (se utilizar Vite ou similar):
+
+```env
+VITE_GOOGLE_API_KEY=SuaChaveAqui
+VITE_GOOGLE_CALENDAR_ID=SeuIDDeCalendario
+```
+
+*   **Google Calendar:** Se as chaves acima não forem fornecidas, o sistema rodará em **Modo Simulação** (Mock), permitindo o uso da interface sem integração real.
 *   **Mapas:** O sistema utiliza OpenStreetMap (Nominatim), que é gratuito e não requer chave para uso moderado.
 
 ---

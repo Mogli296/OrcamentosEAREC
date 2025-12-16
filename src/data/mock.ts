@@ -10,16 +10,6 @@ import { QuoteData } from '../types';
  * DICA: Altere os valores abaixo para ajustar a precificação do negócio sem mexer na lógica.
  */
 
-// ========================================================================
-// 📅 CONFIGURAÇÃO GOOGLE CALENDAR
-// ========================================================================
-// Para ativar a verificação real, substitua as strings vazias abaixo.
-// O calendário deve estar público com permissão "Ver apenas livre/ocupado".
-export const googleCalendarConfig = {
-  apiKey: "", // Ex: "AIzaSyD..." (Google Cloud Console -> Calendar API)
-  calendarId: "" // Ex: "seu_email@gmail.com" ou ID do calendário comercial
-};
-
 export const mockQuote: QuoteData = {
   // ID interno do orçamento (gerado dinamicamente com o ano atual)
   id: `EAREC-${new Date().getFullYear()}-X92`,

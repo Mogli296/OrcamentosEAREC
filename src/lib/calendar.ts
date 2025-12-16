@@ -1,6 +1,4 @@
 
-import { googleCalendarConfig } from '../data/mock';
-
 /**
  * Serviço de Integração com Google Calendar
  * Verifica se existem eventos (busy) em um dia específico.
@@ -17,7 +15,11 @@ export const checkDateAvailability = async (dateString: string): Promise<{ avail
     return { available: false, message: "A data não pode ser no passado." };
   }
 
-  const { apiKey, calendarId } = googleCalendarConfig;
+  // CONFIGURAÇÃO SEGURA:
+  // As chaves devem vir de variáveis de ambiente, nunca hardcoded no fonte.
+  // Se não estiverem presentes, o sistema roda em modo Simulação (Mock).
+  const apiKey = (import.meta as any).env?.VITE_GOOGLE_API_KEY || "";
+  const calendarId = (import.meta as any).env?.VITE_GOOGLE_CALENDAR_ID || "";
   
   // SIMULAÇÃO / MOCK (Se não houver chaves configuradas)
   // Isso permite que o app funcione visualmente sem quebrar se o usuário não tiver configurado a API ainda.
