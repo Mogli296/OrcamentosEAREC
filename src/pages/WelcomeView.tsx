@@ -1,9 +1,11 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
-import { ArrowRight, Calendar, MapPin, User, Smartphone, Lock, CheckCircle2, Loader2 } from 'lucide-react';
+import { ArrowRight, Calendar, MapPin, User, Smartphone, Lock, CheckCircle2, Loader2, XCircle, AlertCircle } from 'lucide-react';
 import Logo from '../components/ui/Logo';
 import Button from '../components/ui/Button';
 import { ClientData } from '../types';
+import { checkDateAvailability } from '../lib/calendar';
 
 interface WelcomeViewProps {
   onStart: (data: ClientData) => void;
@@ -22,7 +24,6 @@ const introContainer: Variants = {
   }
 };
 
-// Variante específica da Logo: Começa mais baixo (centro) e sobe
 const logoVariant: Variants = {
   hidden: { 
     opacity: 0, 
@@ -49,7 +50,7 @@ const formVariant: Variants = {
   }
 };
 
-// Sub-componente para Input com Validação Rápida (1s)
+// Sub-componente SmartInput Melhorado
 const SmartInput = ({ 
   icon: Icon, 
   name, 
@@ -58,29 +59,37 @@ const SmartInput = ({
   value, 
   onChange, 
   minLength = 3,
-  className 
+  className,
+  externalStatus = null, // 'loading', 'valid', 'error', 'idle' ou null (para usar lógica interna)
+  errorMessage = ""
 }: any) => {
-  const [status, setStatus] = useState<'idle' | 'typing' | 'loading' | 'valid'>('idle');
+  const [internalStatus, setInternalStatus] = useState<'idle' | 'typing' | 'loading' | 'valid'>('idle');
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Se receber status externo, usa ele. Se não, usa lógica interna.
+  const status = externalStatus || internalStatus;
+
   useEffect(() => {
+    // Se houver status externo controlado pelo pai, ignoramos a lógica interna de validação simples
+    if (externalStatus !== null) return;
+
     if (!value) {
-      setStatus('idle');
+      setInternalStatus('idle');
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       return;
     }
 
-    setStatus('typing');
+    setInternalStatus('typing');
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
     timeoutRef.current = setTimeout(() => {
-      setStatus('loading');
+      setInternalStatus('loading');
       
       setTimeout(() => {
         if (value.length >= minLength) {
-          setStatus('valid');
+          setInternalStatus('valid');
         } else {
-          setStatus('idle');
+          setInternalStatus('idle');
         }
       }, 800);
 
@@ -89,7 +98,7 @@ const SmartInput = ({
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-  }, [value, minLength]);
+  }, [value, minLength, externalStatus]);
 
   return (
     <div className="group relative">
@@ -101,7 +110,7 @@ const SmartInput = ({
         placeholder={placeholder}
         value={value}
         onChange={onChange}
-        className={`w-full bg-transparent border-b border-white/20 py-3 pl-8 pr-8 text-white focus:outline-none focus:border-brand-DEFAULT transition-colors placeholder:text-neutral-600 ${className}`}
+        className={`w-full bg-transparent border-b border-white/20 py-3 pl-8 pr-8 text-white focus:outline-none focus:border-brand-DEFAULT transition-colors placeholder:text-neutral-600 ${className} ${status === 'error' ? 'border-red-500/50 text-red-100' : ''}`}
       />
       
       <AnimatePresence mode="wait">
@@ -129,6 +138,34 @@ const SmartInput = ({
             <CheckCircle2 size={20} />
           </motion.div>
         )}
+
+        {status === 'error' && (
+           <motion.div
+             key="error"
+             initial={{ scale: 0, opacity: 0 }}
+             animate={{ scale: 1, opacity: 1 }}
+             exit={{ scale: 0, opacity: 0 }}
+             className="absolute right-0 top-3 text-red-500 drop-shadow-[0_0_8px_rgba(220,38,38,0.5)]"
+           >
+             <XCircle size={20} />
+           </motion.div>
+        )}
+      </AnimatePresence>
+      
+      {/* Mensagem de Erro Abaixo do Input */}
+      <AnimatePresence>
+        {status === 'error' && errorMessage && (
+            <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="overflow-hidden"
+            >
+                <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
+                    <AlertCircle size={10} /> {errorMessage}
+                </p>
+            </motion.div>
+        )}
       </AnimatePresence>
     </div>
   );
@@ -142,20 +179,51 @@ const WelcomeView: React.FC<WelcomeViewProps> = ({ onStart, onAdminClick }) => {
     contact: ''
   });
 
+  // Estados específicos para validação de data
+  const [dateStatus, setDateStatus] = useState<'idle' | 'loading' | 'valid' | 'error'>('idle');
+  const [dateMessage, setDateMessage] = useState('');
+  const dateTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+
+    // Lógica Específica para Data (Integração Google Calendar)
+    if (name === 'date') {
+        if (!value) {
+            setDateStatus('idle');
+            return;
+        }
+
+        setDateStatus('loading');
+        if (dateTimeoutRef.current) clearTimeout(dateTimeoutRef.current);
+
+        // Debounce para não chamar a API a cada digitação (embora date picker seja geralmente um evento só)
+        dateTimeoutRef.current = setTimeout(async () => {
+            const result = await checkDateAvailability(value);
+            if (result.available) {
+                setDateStatus('valid');
+                setDateMessage('');
+            } else {
+                setDateStatus('error');
+                setDateMessage(result.message || "Data indisponível");
+            }
+        }, 800);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.name && formData.contact) {
+    if (formData.name && formData.contact && dateStatus !== 'error') {
       onStart(formData);
     }
   };
 
+  // Validação geral do formulário (inclui verificação se a data é válida/disponível)
   const isFormValid = formData.name.length > 2 && 
                       formData.location.length > 3 && 
                       formData.date.length > 0 && 
+                      dateStatus === 'valid' && // Bloqueia se a data não foi validada ou deu erro
                       formData.contact.length > 5;
 
   return (
@@ -226,7 +294,9 @@ const WelcomeView: React.FC<WelcomeViewProps> = ({ onStart, onAdminClick }) => {
               placeholder=""
               value={formData.date}
               onChange={handleChange}
-              minLength={8}
+              // Passa o controle de status para o componente pai (WelcomeView) gerenciar a API
+              externalStatus={!formData.date ? 'idle' : dateStatus}
+              errorMessage={dateMessage}
               className="[&::-webkit-calendar-picker-indicator]:opacity-60 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
             />
 
@@ -259,7 +329,11 @@ const WelcomeView: React.FC<WelcomeViewProps> = ({ onStart, onAdminClick }) => {
                 ease: "easeInOut"
               }}
             >
-              <Button className="w-full group" size="lg">
+              <Button 
+                className={`w-full group ${!isFormValid ? 'opacity-50 cursor-not-allowed' : ''}`} 
+                size="lg"
+                disabled={!isFormValid}
+              >
                 <span className="mr-2">Visualizar Orçamento</span>
                 <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
               </Button>

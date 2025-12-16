@@ -1,394 +1,461 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Camera, 
-  Video, 
-  MapPin, 
-  Home, 
-  Briefcase, 
-  GlassWater, 
-  Megaphone, 
-  CheckCircle2,
-  Minus,
-  Plus,
-  MessageSquarePlus,
-  ArrowRight,
-  PenTool,
-  Map,
-  Route,
-  Navigation,
-  Sparkles
+  Camera, Video, MapPin, Gift, Crown, GraduationCap, Heart, 
+  Store, Building2, Aperture, Plane, Clock, Zap, Minus, Plus, Route, Star, Info, X, MessageCircle
 } from 'lucide-react';
-import { QuoteData, OccasionType, LocationType } from '../../types';
 import { formatCurrency, cn } from '../../lib/utils';
 import { fadeInUp, staggerContainer } from '../../lib/animations';
+import { ServiceCategory, ServiceId } from '../../types';
+import Button from '../ui/Button';
 
-// Definição das Props que o componente recebe do pai (QuoteView)
-interface ConfiguratorProps {
-  data: QuoteData; // Dados base de preços
-  occasion: OccasionType; // Estado atual da ocasião
-  setOccasion: (o: OccasionType) => void;
-  customOccasionText: string;
-  setCustomOccasionText: (s: string) => void;
-  location: LocationType;
-  setLocation: (l: LocationType) => void;
-  photoQty: number;
-  setPhotoQty: (n: number) => void;
-  videoQty: number;
-  setVideoQty: (n: number) => void;
+interface UpsellListProps {
+  category: ServiceCategory;
+  setCategory: (c: ServiceCategory) => void;
+  serviceId: ServiceId;
+  setServiceId: (s: ServiceId) => void;
+  hours: number;
+  setHours: (h: number) => void;
+  qty: number;
+  setQty: (q: number) => void;
+  addDrone: boolean;
+  setAddDrone: (b: boolean) => void;
+  addRealTime: boolean;
+  setAddRealTime: (b: boolean) => void;
   distance: number;
-  onVisible?: () => void; // Função para avisar que o componente apareceu na tela
+  pricePerKm: number;
+  locationClient: string;
 }
 
-/**
- * Componente UpsellList (Configurador)
- * ------------------------------------
- * Esta é a seção interativa onde o cliente personaliza o pacote.
- * Cada clique aqui atualiza o estado na QuoteView e recalcula o preço instantaneamente.
- */
-const UpsellList: React.FC<ConfiguratorProps> = ({ 
-  data,
-  occasion, setOccasion,
-  customOccasionText, setCustomOccasionText,
-  location, setLocation,
-  photoQty, setPhotoQty,
-  videoQty, setVideoQty,
+const UpsellList: React.FC<UpsellListProps> = ({ 
+  category, setCategory,
+  serviceId, setServiceId,
+  hours, setHours,
+  qty, setQty,
+  addDrone, setAddDrone,
+  addRealTime, setAddRealTime,
   distance,
-  onVisible
+  pricePerKm,
+  locationClient
 }) => {
 
-  // Lista de ocasiões disponíveis
-  const occasions = [
-    { id: 'institutional', label: 'Institucional', icon: Briefcase, desc: 'Corporativo & Marca' },
-    { id: 'advertising', label: 'Publicidade', icon: Megaphone, desc: 'Comercial & Vendas' },
-    { id: 'social', label: 'Social', icon: GlassWater, desc: 'Eventos & Gala' },
-    { id: 'custom', label: 'Outro', icon: PenTool, desc: 'Personalizado' },
+  const categories = [
+    { id: 'social', label: 'Eventos Sociais', icon: Crown },
+    { id: 'commercial', label: 'Comercial', icon: Store },
+    { id: 'studio', label: 'Estúdio', icon: Aperture },
+    { id: 'video_production', label: 'Produção', icon: Video },
+    { id: 'custom', label: 'Personalizado', icon: Star, highlight: true },
   ];
 
-  // Abre o Google Maps em nova aba com a rota traçada
-  const handleMapsRedirect = () => {
-    // Origem atualizada conforme solicitado
-    const origin = "EAREC Estúdio Fotográfico, Goianinha, RN"; 
-    const dest = encodeURIComponent(data.client.location);
-    window.open(`https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}`, '_blank');
-  };
+  // Cálculo de custo de deslocamento (Zero se for Estúdio ou Custom)
+  const isNoTravelCost = category === 'studio' || category === 'custom';
+  const travelCost = isNoTravelCost ? 0 : distance * 2 * pricePerKm;
 
-  // Cálculo do custo de viagem apenas para exibição local (o cálculo real do total está na QuoteView)
-  const travelCost = distance * 2 * data.pricePerKm; // Ida e Volta
+  const whatsappNumber = "5584981048857";
 
   return (
-    <section 
-      id="configurator" 
-      className="py-24 px-6 md:px-12 bg-neutral-900/30 border-y border-white/5 relative overflow-hidden scroll-mt-20"
-      onMouseEnter={onVisible} // Detecta interação desktop
-      onTouchStart={onVisible} // Detecta interação mobile
-    >
-      {/* Trigger invisível para animações */}
-      <motion.div onViewportEnter={onVisible} className="absolute top-10 left-0 w-full h-px" />
-      
-      {/* Luz de fundo decorativa */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-DEFAULT/5 rounded-full blur-[120px] pointer-events-none" />
-
-      <div className="max-w-5xl mx-auto space-y-20 relative z-10">
+    <section id="configurator" className="py-12 px-4 md:px-8 bg-neutral-900/30 min-h-screen">
+      <div className="max-w-5xl mx-auto space-y-12">
         
-        <motion.div 
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          variants={staggerContainer}
-          className="text-center"
-        >
-          <motion.h2 variants={fadeInUp} className="font-serif text-4xl text-white mb-2">Configure sua Produção</motion.h2>
-          <motion.p variants={fadeInUp} className="text-neutral-400">Personalize o escopo para atender às necessidades do projeto.</motion.p>
-        </motion.div>
-
-        {/* 1. SELEÇÃO DE OCASIÃO (Grid de Botões) */}
-        <div className="space-y-6">
-            <h3 className="text-xs uppercase tracking-widest text-white/40 font-semibold border-l-2 border-brand-DEFAULT pl-3">
-                01. Ocasião do Projeto
-            </h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {occasions.map((occ) => {
-                    const isActive = occasion === occ.id;
-                    const Icon = occ.icon;
-                    return (
-                        <motion.button
-                            key={occ.id}
-                            onClick={() => setOccasion(occ.id as OccasionType)}
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            className={cn(
-                                "flex flex-col items-center justify-center p-6 rounded-lg border transition-all duration-300",
-                                isActive 
-                                    ? "bg-brand-DEFAULT text-white border-brand-DEFAULT shadow-[0_0_20px_rgba(220,38,38,0.3)]" 
-                                    : "bg-white/5 border-white/10 text-neutral-400 hover:bg-white/10 hover:text-white"
-                            )}
-                        >
-                            <Icon size={24} className="mb-3" />
-                            <span className="font-serif text-lg font-medium">{occ.label}</span>
-                            <span className="text-xs opacity-60 mt-1">{occ.desc}</span>
-                        </motion.button>
-                    )
-                })}
-            </div>
-
-            {/* Input Condicional: Aparece só se escolher "Outro" */}
-            <AnimatePresence>
-                {occasion === 'custom' && (
-                    <motion.div
-                        initial={{ opacity: 0, height: 0, y: -10 }}
-                        animate={{ opacity: 1, height: 'auto', y: 0 }}
-                        exit={{ opacity: 0, height: 0, y: -10 }}
-                        className="overflow-hidden"
+        {/* 1. SELEÇÃO DE CATEGORIA (TABS) */}
+        <div className="flex flex-wrap justify-center gap-2 md:gap-4 bg-neutral-950/50 p-2 rounded-xl border border-white/5">
+            {categories.map((cat) => {
+                const isActive = category === cat.id;
+                const Icon = cat.icon;
+                return (
+                    <button
+                        key={cat.id}
+                        onClick={() => setCategory(cat.id as ServiceCategory)}
+                        className={cn(
+                            "flex items-center gap-2 px-4 py-3 rounded-lg transition-all text-sm md:text-base font-medium",
+                            isActive 
+                                ? "bg-brand-DEFAULT text-white shadow-lg shadow-brand-DEFAULT/20" 
+                                : "text-neutral-400 hover:text-white hover:bg-white/5",
+                            // Destaque visual para "Personalizado"
+                            cat.highlight && !isActive && "text-brand-DEFAULT hover:bg-brand-DEFAULT/10 border border-brand-DEFAULT/20"
+                        )}
                     >
-                        <div className="bg-neutral-950/50 p-6 rounded-lg border border-white/10 flex items-center gap-4">
-                            <PenTool className="text-brand-DEFAULT" />
-                            <input 
-                                type="text"
-                                value={customOccasionText}
-                                onChange={(e) => setCustomOccasionText(e.target.value)}
-                                placeholder="Descreva brevemente a ocasião (Ex: Lançamento de Produto, Videoclipe...)"
-                                className="w-full bg-transparent border-b border-white/20 py-2 text-white focus:outline-none focus:border-brand-DEFAULT transition-colors placeholder:text-neutral-600"
-                                autoFocus
+                        <Icon size={18} />
+                        {cat.label}
+                    </button>
+                )
+            })}
+        </div>
+
+        <motion.div 
+            key={category}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-8"
+        >
+            {/* 2. OPÇÕES ESPECÍFICAS DA CATEGORIA */}
+            
+            {/* === SOCIAL === */}
+            {category === 'social' && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <ServiceCard 
+                        active={serviceId === 'birthday'} onClick={() => setServiceId('birthday')}
+                        icon={Gift} title="Aniversário / Chá" price="R$ 400 (2h)"
+                        desc="Cobertura completa dos parabéns e decoração."
+                        details="Inclui 2 horas de cobertura fotográfica. Todas as fotos tratadas entregues via link. Valor de hora extra aplicável. Ideal para Chá Revelação, Mesversário e Aniversários intimistas."
+                    />
+                    <ServiceCard 
+                        active={serviceId === 'fifteen'} onClick={() => setServiceId('fifteen')}
+                        icon={Crown} title="15 Anos" price="R$ 400 (2h)"
+                        desc="Registro especial do debut."
+                        details="Foco na debutante, recepção e valsa. Inclui 2 horas de cobertura base. Fotos ilimitadas durante o período contratado com tratamento de cor profissional."
+                    />
+                    <ServiceCard 
+                        active={serviceId === 'graduation'} onClick={() => setServiceId('graduation')}
+                        icon={GraduationCap} title="Formatura" price="R$ 800 (Fixo)"
+                        details="Cobertura do evento de colação ou baile. Valor fechado para o evento (sem limite rígido de horas, cobrindo os momentos principais). Entrega digital em alta resolução."
+                    />
+                    <ServiceCard 
+                        active={serviceId === 'wedding_base'} onClick={() => setServiceId('wedding_base')}
+                        icon={Heart} title="Casamento (Base)" price="R$ 650"
+                        desc="Cerimônia + Decoração + Convidados"
+                        details="Cobertura essencial do casamento. Inclui fotos protocolares, decoração, cerimônia religiosa/civil e fotos com padrinhos e convidados."
+                    />
+                    
+                    {/* Pacotes de Casamento */}
+                    <div className="md:col-span-2 pt-4">
+                        <p className="text-xs uppercase tracking-widest text-neutral-500 mb-3 ml-1">Pacotes de Casamento</p>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <ServiceCard 
+                                active={serviceId === 'wedding_classic'} onClick={() => setServiceId('wedding_classic')}
+                                title="Clássico" price="R$ 900"
+                                desc="Pré-Wedding + Casamento"
+                                details="O pacote essencial. Inclui ensaio Pré-Wedding (externo) e a cobertura completa do evento de Casamento (Cerimônia e Recepção)."
+                                highlight
+                            />
+                            <ServiceCard 
+                                active={serviceId === 'wedding_romance'} onClick={() => setServiceId('wedding_romance')}
+                                title="Romance" price="R$ 1.150"
+                                desc="Pré + Making Off + Casamento"
+                                details="Pacote intermediário. Acrescenta a cobertura do Making Of da noiva/noivo, capturando a emoção da preparação, além do Pré-Wedding e Casamento."
+                                highlight
+                            />
+                            <ServiceCard 
+                                active={serviceId === 'wedding_essence'} onClick={() => setServiceId('wedding_essence')}
+                                title="Essência" price="R$ 1.750"
+                                desc="Pré + MkOff + Casamento + Vídeo"
+                                details="A experiência completa EAREC. Tudo do pacote Romance + cobertura de VÍDEO cinematográfico do grande dia (Highlight/Melhores Momentos)."
+                                highlight
                             />
                         </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-        </div>
-
-        {/* 2. SELEÇÃO DE LOCAL (Cards Grandes) */}
-        <div className="space-y-6">
-            <h3 className="text-xs uppercase tracking-widest text-white/40 font-semibold border-l-2 border-brand-DEFAULT pl-3">
-                02. Ambiente & Logística
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <motion.div
-                    onClick={() => setLocation('external')}
-                    className={cn(
-                        "cursor-pointer p-6 rounded-lg border flex items-center gap-6 transition-all duration-300",
-                        location === 'external'
-                            ? "bg-gradient-to-r from-neutral-900 to-neutral-800 border-brand-DEFAULT/50 ring-1 ring-brand-DEFAULT"
-                            : "bg-neutral-950 border-white/10 hover:border-white/20"
-                    )}
-                >
-                    <div className={cn("p-4 rounded-full", location === 'external' ? "bg-brand-DEFAULT text-white" : "bg-white/10 text-neutral-400")}>
-                        <MapPin size={24} />
                     </div>
-                    <div>
-                        <h4 className="text-xl font-serif text-white">Locação Externa</h4>
-                        <p className="text-sm text-neutral-400 mt-1">Luz natural e cenários reais. Ideal para lifestyle.</p>
-                        <span className="text-xs text-brand-DEFAULT mt-2 block font-medium">Incluso no pacote base</span>
-                    </div>
-                </motion.div>
-
-                <motion.div
-                    onClick={() => setLocation('studio')}
-                    className={cn(
-                        "cursor-pointer p-6 rounded-lg border flex items-center gap-6 transition-all duration-300",
-                        location === 'studio'
-                            ? "bg-gradient-to-r from-neutral-900 to-neutral-800 border-brand-DEFAULT/50 ring-1 ring-brand-DEFAULT"
-                            : "bg-neutral-950 border-white/10 hover:border-white/20"
-                    )}
-                >
-                    <div className={cn("p-4 rounded-full", location === 'studio' ? "bg-brand-DEFAULT text-white" : "bg-white/10 text-neutral-400")}>
-                        <Home size={24} />
-                    </div>
-                    <div>
-                        <h4 className="text-xl font-serif text-white">Estúdio Controlado</h4>
-                        <p className="text-sm text-neutral-400 mt-1">Fundo infinito, iluminação de cinema e estrutura completa.</p>
-                        <span className="text-xs text-white/60 mt-2 block font-medium">+ {formatCurrency(data.studioFee)} (Taxa de Locação)</span>
-                    </div>
-                </motion.div>
-            </div>
-        </div>
-
-        {/* 3. VOLUME DE ENTREGÁVEIS (Contadores +/-) */}
-        <div className="space-y-6">
-            <h3 className="text-xs uppercase tracking-widest text-white/40 font-semibold border-l-2 border-brand-DEFAULT pl-3">
-                03. Volume de Entregáveis
-            </h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-black/20 p-8 rounded-2xl border border-white/5">
-                {/* Contador de Fotos (Incremento de 4 em 4) */}
-                <div className="flex flex-col items-center">
-                    <div className="flex items-center gap-3 mb-4 text-white">
-                        <Camera className="text-brand-DEFAULT" />
-                        <span className="font-serif text-xl">Fotografias (Tratadas)</span>
-                    </div>
-                    <div className="flex items-center gap-6 bg-neutral-950 p-2 rounded-full border border-white/10">
-                        <button 
-                            onClick={() => setPhotoQty(Math.max(0, photoQty - 4))}
-                            className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white transition-colors"
-                        >
-                            <Minus size={16} />
-                        </button>
-                        <span className="text-3xl font-mono w-16 text-center text-white">{photoQty}</span>
-                        <button 
-                            onClick={() => setPhotoQty(photoQty + 4)}
-                            className="w-10 h-10 rounded-full bg-brand-DEFAULT hover:bg-red-600 flex items-center justify-center text-white transition-colors shadow-lg shadow-brand-DEFAULT/20"
-                        >
-                            <Plus size={16} />
-                        </button>
-                    </div>
-                    <p className="mt-3 text-sm text-neutral-500">{formatCurrency(data.photoUnitPrice)} / unidade</p>
                 </div>
+            )}
 
-                {/* Contador de Vídeos (Incremento de 1 em 1) */}
-                <div className="flex flex-col items-center md:border-l md:border-white/10">
-                    <div className="flex items-center gap-3 mb-4 text-white">
-                        <Video className="text-brand-DEFAULT" />
-                        <span className="font-serif text-xl">Vídeos (1 min)</span>
-                    </div>
-                    <div className="flex items-center gap-6 bg-neutral-950 p-2 rounded-full border border-white/10">
-                        <button 
-                            onClick={() => setVideoQty(Math.max(0, videoQty - 1))}
-                            className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white transition-colors"
-                        >
-                            <Minus size={16} />
-                        </button>
-                        <span className="text-3xl font-mono w-16 text-center text-white">{videoQty}</span>
-                        <button 
-                            onClick={() => setVideoQty(videoQty + 1)}
-                            className="w-10 h-10 rounded-full bg-brand-DEFAULT hover:bg-red-600 flex items-center justify-center text-white transition-colors shadow-lg shadow-brand-DEFAULT/20"
-                        >
-                            <Plus size={16} />
-                        </button>
-                    </div>
-                    <p className="mt-3 text-sm text-neutral-500">{formatCurrency(data.videoUnitPrice)} / vídeo</p>
+            {/* === COMMERCIAL === */}
+            {category === 'commercial' && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <ServiceCard 
+                        active={serviceId === 'comm_photo'} onClick={() => setServiceId('comm_photo')}
+                        icon={Camera} title="Fotografia" price="R$ 20 / foto"
+                        desc="Para lojas e gastronomia."
+                        details="Valor por foto tratada. Ideal para e-commerce, cardápios e lookbooks."
+                    />
+                    <ServiceCard 
+                        active={serviceId === 'comm_video'} onClick={() => setServiceId('comm_video')}
+                        icon={Video} title="Vídeo" price="R$ 500"
+                        desc="Captação + Edição (até 1min)."
+                        details="Produção de vídeo institucional ou promocional (Reels/TikTok) de até 1 minuto."
+                    />
+                    <ServiceCard 
+                        active={serviceId === 'comm_combo'} onClick={() => setServiceId('comm_combo')}
+                        icon={Zap} title="Combo Visual" price="Vídeo + Fotos"
+                        desc="Foto + Vídeo (até 1min)"
+                        details="O pacote completo para redes sociais. Inclui a produção do vídeo comercial E as fotos dos produtos/espaço. Selecione a quantidade de fotos desejada abaixo."
+                        highlight
+                    />
                 </div>
-            </div>
-        </div>
+            )}
 
-        {/* 4. LOGÍSTICA & MAPS (Display automático) */}
-        <div className="space-y-6">
-             <h3 className="text-xs uppercase tracking-widest text-white/40 font-semibold border-l-2 border-brand-DEFAULT pl-3 flex items-center gap-2">
-                04. Logística & Deslocamento <Map size={14} className="text-brand-DEFAULT" />
-            </h3>
+            {/* === STUDIO === */}
+            {category === 'studio' && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <ServiceCard 
+                        active={serviceId === 'studio_photo'} onClick={() => setServiceId('studio_photo')}
+                        icon={Camera} title="Ensaio em Estúdio" price="R$ 25 / foto"
+                        details="Sessão fotográfica em ambiente controlado. Iluminação profissional. Valor por foto escolhida e tratada (Skin retouch incluso)."
+                    />
+                    <ServiceCard 
+                        active={serviceId === 'studio_video'} onClick={() => setServiceId('studio_video')}
+                        icon={Video} title="Vídeo em Estúdio" price="R$ 350 (2h)"
+                        details="Gravação de conteúdo em estúdio (ex: Cursos, Youtube, Entrevistas). Valor referente a diária de 2 horas de estúdio com operador."
+                    />
+                </div>
+            )}
 
-            <div className="bg-neutral-950 rounded-xl border border-white/10 overflow-hidden relative">
-                 <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5 pointer-events-none" />
-                 
-                 <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-                    
-                    {/* Visualização da Rota */}
-                    <div className="space-y-6">
-                        <div className="flex items-start gap-4">
-                            <div className="flex flex-col items-center gap-1 mt-1">
-                                <div className="w-3 h-3 rounded-full bg-neutral-500" />
-                                <div className="w-0.5 h-12 bg-gradient-to-b from-neutral-500 to-brand-DEFAULT" />
-                                <div className="w-3 h-3 rounded-full bg-brand-DEFAULT shadow-[0_0_10px_#DC2626]" />
-                            </div>
-                            <div className="flex-1 space-y-8">
-                                <div>
-                                    <p className="text-xs text-neutral-500 uppercase tracking-widest">Origem (Base)</p>
-                                    <p className="text-white font-serif text-lg">EAREC Estúdio - Goianinha</p>
-                                </div>
-                                <div>
-                                    <p className="text-xs text-neutral-500 uppercase tracking-widest">Destino (Projeto)</p>
-                                    <p className="text-white font-serif text-lg">{data.client.location}</p>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <button 
-                            onClick={handleMapsRedirect}
-                            className="flex items-center gap-2 text-xs font-bold text-brand-DEFAULT uppercase tracking-wider hover:text-white transition-colors border border-brand-DEFAULT/30 px-4 py-2 rounded hover:bg-brand-DEFAULT/10 w-fit"
-                        >
-                            <Route size={14} />
-                            Ver rota no Google Maps
-                        </button>
-                    </div>
+            {/* === VIDEO PRODUCTION === */}
+            {category === 'video_production' && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <ServiceCard 
+                        active={serviceId === 'edit_only'} onClick={() => setServiceId('edit_only')}
+                        icon={Zap} title="Apenas Edição" price="R$ 250 / vídeo"
+                        details="Você envia o material bruto, nós editamos. Cortes, transições, correção de cor e sound design."
+                    />
+                    <ServiceCard 
+                        active={serviceId === 'cam_cap'} onClick={() => setServiceId('cam_cap')}
+                        icon={Video} title="Captação Câmera" price="R$ 350"
+                        details="Operador de câmera profissional com equipamento de cinema (4K). Valor por serviço/diária (até 6h)."
+                    />
+                    <ServiceCard 
+                        active={serviceId === 'mobile_cap'} onClick={() => setServiceId('mobile_cap')}
+                        icon={SmartphoneIcon} title="Captação Celular" price="R$ 250"
+                        details="Captação ágil com iPhone de última geração. Ideal para bastidores e conteúdo nativo para Stories/TikTok."
+                    />
+                    <ServiceCard 
+                        active={serviceId === 'drone'} onClick={() => setServiceId('drone')}
+                        icon={Plane} title="Drone" price="R$ 250"
+                        details="Imagens aéreas em 4K. Inclui 2 baterias de voo. Operador licenciado."
+                    />
+                </div>
+            )}
 
-                    {/* Display de Distância Automática */}
-                    <div className="bg-white/5 p-6 rounded-lg border border-white/5">
-                        <div className="flex items-center justify-between mb-4">
-                            <h4 className="flex items-center gap-2 text-white font-medium">
-                                <Navigation size={18} className="text-brand-DEFAULT" />
-                                Distância Calculada
-                            </h4>
-                        </div>
-                        
-                        <div className="flex items-end gap-2 mb-2">
-                            <span className="text-5xl font-mono text-white tracking-tighter">{distance}</span>
-                            <span className="text-xl text-neutral-500 mb-2">km</span>
-                        </div>
-                        
-                        <p className="text-xs text-neutral-500 border-t border-white/10 pt-2 mt-2">
-                           Distância de ida estimada automaticamente.
-                        </p>
-
-                        <div className="mt-6 pt-4 border-t border-white/10 flex justify-between items-center">
-                            <p className="text-sm text-neutral-400">Custo Logístico (Ida e Volta)</p>
-                            <p className="text-xl text-brand-DEFAULT font-serif">
-                                {travelCost > 0 ? formatCurrency(travelCost) : "Grátis / Incluso"}
-                            </p>
-                        </div>
-                    </div>
-
-                 </div>
-            </div>
-        </div>
-
-        {/* ORÇAMENTO PERSONALIZADO */}
-        <motion.div 
-           initial={{ opacity: 0, y: 20 }}
-           whileInView={{ opacity: 1, y: 0 }}
-           viewport={{ once: true }}
-           className="relative group cursor-pointer"
-           onClick={() => window.open('https://wa.me/5584981048857?text=Olá,%20gostaria%20de%20um%20orçamento%20personalizado.', '_blank')}
-        >
-          <div className="absolute inset-0 bg-brand-DEFAULT/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          <div className="relative border border-dashed border-brand-DEFAULT/40 hover:border-brand-DEFAULT bg-brand-DEFAULT/5 rounded-lg p-6 flex flex-col md:flex-row items-center justify-between gap-6 transition-all duration-300">
-             <div className="flex items-center gap-4">
-               <div className="p-3 bg-brand-DEFAULT text-white rounded-full">
-                  <MessageSquarePlus size={24} />
-               </div>
-               <div className="text-center md:text-left">
-                  <h4 className="text-lg font-serif text-white">Orçamento Personalizado</h4>
-                  <p className="text-sm text-neutral-400">Precisa de diárias adicionais, casting específico ou locações complexas?</p>
-               </div>
-             </div>
-             <div className="flex items-center gap-2 text-brand-DEFAULT font-medium text-sm uppercase tracking-wider group-hover:translate-x-2 transition-transform">
-               Falar com Produtor <ArrowRight size={16} />
-             </div>
-          </div>
-        </motion.div>
-
-        {/* LISTA DE ITENS INCLUSOS (Exibe o que já vem no pacote) */}
-        <motion.div className="bg-white/5 rounded-lg p-8 border border-white/5">
-            <h3 className="font-serif text-2xl text-white mb-6 flex items-center gap-3">
-                <Sparkles className="text-brand-DEFAULT" size={20} />
-                Incluso na Experiência
-            </h3>
-            <div className="space-y-4">
-                {data.items.filter(i => i.isIncluded).map((item, idx) => (
-                    <motion.div 
-                        key={item.id}
-                        initial={{ opacity: 0, x: -10 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        transition={{ delay: idx * 0.1 }}
-                        className="flex items-start gap-4 p-4 rounded bg-neutral-950/50 border border-white/5"
+            {/* === CUSTOM (SEMPRE DISPONÍVEL) - DESIGN SUTIL === */}
+            {category === 'custom' && (
+                <div className="bg-white/5 border border-white/10 p-8 rounded-xl text-center group transition-colors hover:border-white/20">
+                    <motion.div
+                        animate={{ scale: [1, 1.2, 1], opacity: [1, 0.8, 1] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                     >
-                        <CheckCircle2 className="text-green-500 mt-1 shrink-0" size={18} />
-                        <div>
-                            <div className="flex items-center gap-3">
-                                <h4 className="text-white font-medium">{item.title}</h4>
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-brand-DEFAULT bg-brand-DEFAULT/10 px-2 py-0.5 rounded">
-                                    INCLUSO
-                                </span>
-                            </div>
-                            <p className="text-sm text-neutral-400 mt-1">{item.description}</p>
-                        </div>
+                        <Star size={48} className="text-red-600 mx-auto mb-4 fill-red-600/20" />
                     </motion.div>
-                ))}
-            </div>
+                    
+                    <h3 className="text-2xl font-serif text-neutral-200 mb-2">Orçamento Personalizado</h3>
+                    <p className="text-neutral-500 mb-6 max-w-lg mx-auto text-sm">
+                        Projetos únicos exigem soluções sob medida. Fale diretamente com nossa equipe criativa.
+                    </p>
+                    
+                    <a 
+                        href={`https://wa.me/${whatsappNumber}?text=Olá, gostaria de um orçamento personalizado.`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 bg-neutral-800 hover:bg-neutral-700 text-white px-6 py-3 rounded-full transition-colors font-medium text-sm border border-white/10"
+                    >
+                        <MessageCircle size={16} />
+                        Fale conosco clicando aqui
+                    </a>
+                </div>
+            )}
+
+
+            {/* 3. CONFIGURAÇÕES ADICIONAIS (CONDICIONAIS) */}
+            
+            {/* Seletor de HORAS (Só para Birthday e 15 anos) */}
+            {(serviceId === 'birthday' || serviceId === 'fifteen') && category === 'social' && (
+                <div className="bg-white/5 p-8 rounded-xl border border-white/10 flex flex-col items-center">
+                    <div className="flex items-center gap-2 text-white mb-6">
+                        <Clock className="text-brand-DEFAULT" />
+                        <span className="font-serif text-xl">Duração do Evento</span>
+                    </div>
+                    
+                    {/* Número Grande em Destaque */}
+                    <span className="text-7xl font-sans font-bold text-white mb-2 tracking-tighter">
+                        {hours}<span className="text-2xl text-neutral-500 ml-1 font-normal">h</span>
+                    </span>
+                    <p className="text-sm text-neutral-400 mb-8">Tempo total de cobertura</p>
+
+                    <div className="flex items-center gap-6 w-full max-w-xs">
+                        <button onClick={() => setHours(Math.max(2, hours - 1))} className="p-4 bg-white/10 rounded-full hover:bg-white/20 transition-colors"><Minus size={24} /></button>
+                        <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
+                            <div className="h-full bg-brand-DEFAULT transition-all" style={{ width: `${(hours / 10) * 100}%` }} />
+                        </div>
+                        <button onClick={() => setHours(hours + 1)} className="p-4 bg-white/10 rounded-full hover:bg-white/20 transition-colors"><Plus size={24} /></button>
+                    </div>
+                    <p className="text-xs text-neutral-500 mt-6 bg-black/30 px-3 py-1 rounded-full">Incluso 2h base. +R$ 250/h extra.</p>
+                </div>
+            )}
+
+            {/* Seletor de QUANTIDADE (Comercial: Foto/Combo, Estúdio: Foto, Produção: Edição) */}
+            {(
+                (category === 'commercial' && (serviceId === 'comm_photo' || serviceId === 'comm_combo')) || 
+                serviceId === 'studio_photo' || 
+                serviceId === 'edit_only'
+             ) && (
+                <div className="bg-white/5 p-8 rounded-xl border border-white/10 flex flex-col items-center shadow-2xl">
+                    <div className="flex items-center gap-2 text-white mb-6">
+                        <Camera className="text-brand-DEFAULT" />
+                        <span className="font-serif text-xl">Quantidade de {serviceId === 'edit_only' ? 'Vídeos' : 'Fotos'}</span>
+                    </div>
+                    
+                    {/* Número Gigante Centralizado */}
+                    <div className="relative mb-8">
+                        <span className="text-8xl font-sans font-bold text-white tracking-tighter drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]">
+                            {qty}
+                        </span>
+                        <span className="absolute -right-8 top-2 text-lg text-neutral-500 font-medium">und</span>
+                    </div>
+
+                    <div className="flex items-center gap-8 w-full max-w-sm">
+                        <button 
+                            onClick={() => setQty(Math.max(1, qty - 5))} 
+                            className="w-16 h-16 flex items-center justify-center bg-white/5 border border-white/10 rounded-full hover:bg-brand-DEFAULT hover:border-brand-DEFAULT transition-all group"
+                        >
+                            <Minus size={24} className="text-neutral-400 group-hover:text-white" />
+                        </button>
+                        
+                        <div className="flex-1 h-2 bg-neutral-800 rounded-full overflow-hidden">
+                            <motion.div 
+                                layout 
+                                className="h-full bg-gradient-to-r from-brand-DEFAULT/50 to-brand-DEFAULT" 
+                                style={{ width: `${Math.min(100, (qty / 100) * 100)}%` }} 
+                            />
+                        </div>
+
+                        <button 
+                            onClick={() => setQty(qty + 5)} 
+                            className="w-16 h-16 flex items-center justify-center bg-white/5 border border-white/10 rounded-full hover:bg-brand-DEFAULT hover:border-brand-DEFAULT transition-all group"
+                        >
+                            <Plus size={24} className="text-neutral-400 group-hover:text-white" />
+                        </button>
+                    </div>
+                    <p className="text-xs text-neutral-500 mt-6">Ajuste de 5 em 5 unidades.</p>
+                </div>
+            )}
+
+            {/* ADICIONAIS (Checkboxes) - Social Only */}
+            {category === 'social' && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div 
+                        onClick={() => setAddRealTime(!addRealTime)}
+                        className={cn("cursor-pointer p-4 rounded-lg border flex items-center gap-4 transition-all", addRealTime ? "bg-brand-DEFAULT/20 border-brand-DEFAULT" : "bg-white/5 border-white/10")}
+                    >
+                        <div className={cn("w-6 h-6 rounded border flex items-center justify-center", addRealTime ? "bg-brand-DEFAULT border-brand-DEFAULT" : "border-white/50")}>
+                           {addRealTime && <div className="w-2 h-2 bg-white rounded-full" />}
+                        </div>
+                        <div>
+                            <p className="text-white font-medium">Fotos Real Time (+ R$ 600)</p>
+                            <p className="text-xs text-neutral-400">Entrega imediata durante o evento.</p>
+                        </div>
+                    </div>
+
+                    <div 
+                        onClick={() => setAddDrone(!addDrone)}
+                        className={cn("cursor-pointer p-4 rounded-lg border flex items-center gap-4 transition-all", addDrone ? "bg-brand-DEFAULT/20 border-brand-DEFAULT" : "bg-white/5 border-white/10")}
+                    >
+                        <div className={cn("w-6 h-6 rounded border flex items-center justify-center", addDrone ? "bg-brand-DEFAULT border-brand-DEFAULT" : "border-white/50")}>
+                           {addDrone && <div className="w-2 h-2 bg-white rounded-full" />}
+                        </div>
+                        <div>
+                            <p className="text-white font-medium">Imagens de Drone (+ R$ 250)</p>
+                            <p className="text-xs text-neutral-400">Perspectivas aéreas cinematográficas.</p>
+                        </div>
+                    </div>
+                </div>
+            )}
         </motion.div>
+
+        {/* LOGÍSTICA (Compacta) */}
+        {!isNoTravelCost && (
+            <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="flex items-center gap-4">
+                    <div className="p-3 bg-white/5 rounded-full"><Route size={20} className="text-brand-DEFAULT" /></div>
+                    <div>
+                        <p className="text-xs text-neutral-500 uppercase">Destino</p>
+                        <p className="text-white font-medium">{locationClient} <span className="text-neutral-500 text-sm">({distance} km)</span></p>
+                    </div>
+                </div>
+                <div className="text-right">
+                    <p className="text-xs text-neutral-500 uppercase">Taxa de Deslocamento</p>
+                    <p className="text-xl text-white font-mono">{travelCost > 0 ? formatCurrency(travelCost) : "Grátis"}</p>
+                </div>
+            </div>
+        )}
+        
+        {isNoTravelCost && category !== 'custom' && (
+             <div className="border-t border-white/10 pt-8 text-center">
+                <span className="text-xs text-green-500 bg-green-500/10 px-3 py-1 rounded-full border border-green-500/20">
+                    Deslocamento Gratuito (Estúdio)
+                </span>
+             </div>
+        )}
 
       </div>
     </section>
   );
 };
+
+// Componente Auxiliar de Card com EXPANSÃO DE DETALHES e ANIMAÇÃO DE ÍCONE
+const ServiceCard = ({ active, onClick, icon: Icon, title, price, desc, details, highlight }: any) => {
+    const [showDetails, setShowDetails] = useState(false);
+
+    return (
+        <div 
+            onClick={onClick}
+            className={cn(
+                "cursor-pointer p-5 rounded-xl border transition-all duration-300 relative overflow-hidden group flex flex-col h-full justify-between",
+                active 
+                    ? "bg-gradient-to-br from-neutral-800 to-neutral-900 border-brand-DEFAULT shadow-lg shadow-brand-DEFAULT/10" 
+                    : "bg-white/5 border-white/10 hover:bg-white/10",
+                highlight && active && "ring-1 ring-brand-DEFAULT"
+            )}
+        >
+            {active && <div className="absolute top-0 right-0 w-16 h-16 bg-brand-DEFAULT/20 blur-xl rounded-full -mr-8 -mt-8 pointer-events-none" />}
+            
+            <div>
+                <div className="flex items-start justify-between mb-3">
+                    {Icon && (
+                        <motion.div
+                            animate={active ? { scale: [1, 1.2, 1] } : { scale: 1 }}
+                            transition={{ duration: 0.5 }}
+                        >
+                            <Icon size={24} className={cn("mb-2", active ? "text-brand-DEFAULT" : "text-neutral-400")} />
+                        </motion.div>
+                    )}
+                    <div className="flex items-center gap-2">
+                        {/* Botão de Info */}
+                        {details && (
+                            <button 
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setShowDetails(!showDetails);
+                                }}
+                                className="text-neutral-500 hover:text-white transition-colors p-1 z-10"
+                                title="Ver detalhes"
+                            >
+                                <Info size={16} />
+                            </button>
+                        )}
+                        {active && <div className="w-2 h-2 bg-brand-DEFAULT rounded-full" />}
+                    </div>
+                </div>
+                <h4 className={cn("font-serif text-lg leading-tight mb-1", active ? "text-white" : "text-neutral-300")}>{title}</h4>
+                {desc && <p className="text-xs text-neutral-500 mb-2">{desc}</p>}
+            </div>
+
+            <p className={cn("text-sm font-medium mt-2", active ? "text-brand-DEFAULT" : "text-white/60")}>{price}</p>
+
+            {/* Painel de Detalhes Expandível */}
+            <AnimatePresence>
+                {showDetails && (
+                    <motion.div 
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="overflow-hidden"
+                    >
+                        <div className="pt-3 mt-3 border-t border-white/10 text-xs text-neutral-300 leading-relaxed bg-black/20 -mx-5 -mb-5 p-5">
+                             <div className="flex justify-between items-center mb-2">
+                                <span className="font-bold text-white uppercase tracking-wider text-[10px]">O que está incluso:</span>
+                                <button onClick={(e) => { e.stopPropagation(); setShowDetails(false); }}><X size={12} /></button>
+                             </div>
+                             {details}
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+};
+
+// Ícone auxiliar
+const SmartphoneIcon = ({ size, className }: any) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>
+);
 
 export default UpsellList;

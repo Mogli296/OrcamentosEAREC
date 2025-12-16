@@ -2,15 +2,27 @@
 // Definições de Entidades do Sistema
 
 export type LocationType = 'studio' | 'external';
-export type OccasionType = 'institutional' | 'social' | 'advertising' | 'custom';
+export type OccasionType = 'institutional' | 'advertising' | 'social' | 'custom';
+
+// Categorias principais baseadas na nova tabela
+export type ServiceCategory = 'social' | 'commercial' | 'studio' | 'video_production' | 'custom';
+
+// IDs específicos dos serviços
+export type ServiceId = 
+  | 'birthday' | 'fifteen' | 'graduation' 
+  | 'wedding_base' | 'wedding_classic' | 'wedding_romance' | 'wedding_essence'
+  | 'comm_photo' | 'comm_video' | 'comm_combo'
+  | 'studio_photo' | 'studio_video'
+  | 'edit_only' | 'cam_cap' | 'mobile_cap' | 'drone'
+  | 'custom_project';
 
 export interface ServiceItem {
   id: string;
   title: string;
   description: string;
   price: number;
-  isIncluded?: boolean; // Novo campo para itens "Inclusos" (R$ 0)
-  type: 'fixed' | 'variable_photo' | 'variable_video'; // Tipo de item
+  isIncluded?: boolean;
+  type: 'fixed' | 'variable_photo' | 'variable_video';
 }
 
 export interface ClientData {
@@ -18,7 +30,7 @@ export interface ClientData {
   location: string;
   date: string;
   contact: string;
-  company?: string; // Opcional agora, foco na pessoa/projeto
+  company?: string;
   projectTitle?: string;
 }
 
@@ -27,12 +39,12 @@ export interface QuoteData {
   client: ClientData;
   date: string;
   validUntil: string;
-  basePrice: number; // Preço de saída da equipe
-  studioFee: number; // Taxa extra se for estúdio
+  basePrice: number; 
+  studioFee: number;
   photoUnitPrice: number;
   videoUnitPrice: number;
-  pricePerKm: number; // Preço por Km rodado (Logística)
-  items: ServiceItem[]; // Itens fixos descritivos (ex: Roteiro)
+  pricePerKm: number;
+  items: ServiceItem[];
   moodboardImages: string[];
 }
 

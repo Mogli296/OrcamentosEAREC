@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle, Clock, MessageCircle } from 'lucide-react';
+import { CheckCircle, Clock, MessageCircle, ArrowDown } from 'lucide-react';
 import Logo from '../components/ui/Logo';
 import Button from '../components/ui/Button';
 import { fadeInUp, staggerContainer } from '../lib/animations';
@@ -31,48 +31,59 @@ interface SuccessViewProps {
  */
 const SuccessView: React.FC<SuccessViewProps> = ({ onReset, clientData, totalPrice, quoteDetails }) => {
 
-  // Mapas para tradução
-  const occasionMap: Record<string, string> = {
-      'institutional': 'Institucional (Corporativo)',
-      'advertising': 'Publicidade (Comercial)',
-      'social': 'Social (Eventos)',
-      'custom': 'Outro'
-  };
-
-  const locationMap: Record<string, string> = {
-      'external': 'Locação Externa',
-      'studio': 'Estúdio Controlado'
-  };
-
-  // Criação da mensagem detalhada do WhatsApp
   const whatsappNumber = "5584981048857";
   
-  let detailsText = "";
+  // Construção da Mensagem Formatada
+  let message = "";
+
   if (quoteDetails) {
-      const occasionText = quoteDetails.occasion === 'custom' && quoteDetails.customOccasionText 
-          ? `Personalizado (${quoteDetails.customOccasionText})` 
-          : occasionMap[quoteDetails.occasion];
-      
-      detailsText = `
-*RESUMO DO PEDIDO:*
-🎬 *Ocasião:* ${occasionText}
-📍 *Ambiente:* ${locationMap[quoteDetails.location]}
-📸 *Fotos:* ${quoteDetails.photoQty} unidades
-🎥 *Vídeos:* ${quoteDetails.videoQty} vídeos
-🚗 *Distância Estimada:* ${quoteDetails.distance}km (Ida)
-`;
-  }
+      // 1. Definição do Escopo
+      let escopo = "";
+      if (quoteDetails.photoQty > 0 && quoteDetails.videoQty > 0) {
+          escopo = `${quoteDetails.photoQty} Fotos + ${quoteDetails.videoQty} Vídeo(s)`;
+      } else if (quoteDetails.photoQty > 0) {
+          escopo = `${quoteDetails.photoQty} Fotos`;
+      } else if (quoteDetails.videoQty > 0) {
+          escopo = `${quoteDetails.videoQty} Vídeo(s)`;
+      } else {
+          escopo = "Cobertura por Hora/Diária";
+      }
 
-  const message = `
-Olá time EAREC! 👋
-Sou *${clientData.name}* de *${clientData.location}*.
-Acabei de aprovar uma proposta no sistema.
+      // 2. Definição do Ambiente
+      const ambiente = quoteDetails.location === 'studio' ? "Estúdio Controlado" : "Externo / In Loco";
 
-${detailsText}
-💰 *VALOR TOTAL APROVADO:* ${formatCurrency(totalPrice)}
+      // 3. Logística
+      const distanciaStr = `${quoteDetails.distance}km (Ida)`;
+      const freteStr = quoteDetails.location === 'studio' ? "Grátis (Estúdio)" : "Incluso no total";
 
-Aguardo os próximos passos para o contrato!
+      // 4. Montagem do Texto
+      message = `
+*🔔 NOVA PROPOSTA APROVADA*
+
+*👤 DADOS DO CLIENTE*
+*Nome:* ${clientData.name}
+*Local:* ${clientData.location}
+
+*🎬 DETALHES DO SERVIÇO*
+
+*Ocasião:* ${quoteDetails.customOccasionText}
+*Ambiente:* ${ambiente}
+*Escopo:* ${escopo}
+
+*🚚 LOGÍSTICA*
+
+*Distância:* ${distanciaStr}
+*Frete:* ${freteStr}
+
+*💰 FINANCEIRO*
+
+*Valor Total:* ${formatCurrency(totalPrice)}
+*Status:* Aprovado no Sistema
+──────────────
+*🔗 PRÓXIMOS PASSOS*
+Aguardando emissão do contrato.
 `.trim();
+  }
 
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
 
@@ -102,14 +113,22 @@ Aguardo os próximos passos para o contrato!
             </div>
         </motion.div>
 
-        {/* Texto Compactado */}
-        <motion.h1 variants={fadeInUp} className="text-2xl md:text-3xl font-serif text-white mb-4">
-            Proposta Recebida
+        {/* Texto Alterado */}
+        <motion.h1 variants={fadeInUp} className="text-2xl md:text-4xl font-serif text-white mb-2">
+            Orçamento Completo!
         </motion.h1>
 
-        <motion.p variants={fadeInUp} className="text-neutral-400 text-sm md:text-base mb-8 leading-relaxed px-4">
-            Obrigado, <span className="text-white font-medium">{clientData.name}</span>. Nosso time comercial foi notificado e entrará em contato.
-        </motion.p>
+        {/* Call to Action Animado */}
+        <motion.div variants={fadeInUp} className="mb-8">
+             <motion.p 
+                animate={{ y: [0, 5, 0] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                className="text-brand-DEFAULT font-medium text-sm flex items-center justify-center gap-2"
+             >
+                Enviar orçamento clicando no botão abaixo
+                <ArrowDown size={14} />
+             </motion.p>
+        </motion.div>
 
         {/* Card de Status do Pedido - Compacto */}
         <motion.div 
@@ -122,7 +141,7 @@ Aguardo os próximos passos para o contrato!
                 </div>
                 <div className="text-left">
                     <p className="text-[10px] text-neutral-500 uppercase tracking-wider">Status</p>
-                    <p className="text-white text-sm font-medium">Processando Pedido</p>
+                    <p className="text-white text-sm font-medium">Esperando sua mensagem!</p>
                 </div>
             </div>
             {/* Bolinha pulsante */}
@@ -133,14 +152,14 @@ Aguardo os próximos passos para o contrato!
         <motion.div variants={fadeInUp} className="space-y-3 px-4">
             {/* Botão Principal: WhatsApp */}
             <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="block w-full">
-                <Button variant="primary" size="md" className="w-full flex items-center gap-2 justify-center bg-green-600 border-green-600 hover:bg-green-700 shadow-green-900/20 py-3 text-sm">
-                    <MessageCircle size={18} />
-                    Falar agora com o Time
+                <Button variant="primary" size="md" className="w-full flex items-center gap-2 justify-center bg-green-600 border-green-600 hover:bg-green-700 shadow-green-900/20 py-4 text-base font-bold tracking-wide">
+                    <MessageCircle size={20} />
+                    ENVIAR AGORA
                 </Button>
             </a>
 
             {/* Botão Secundário: Reiniciar */}
-            <Button onClick={onReset} size="md" variant="secondary" className="w-full py-3 text-sm">
+            <Button onClick={onReset} size="md" variant="secondary" className="w-full py-3 text-sm border-transparent hover:bg-white/5 text-neutral-500 hover:text-white">
                 Voltar ao Início
             </Button>
         </motion.div>
