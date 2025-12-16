@@ -18,7 +18,7 @@ interface HeroProps {
 const Hero: React.FC<HeroProps> = ({ data }) => {
 
   return (
-    <section className="relative w-full min-h-[50vh] flex items-center justify-center bg-black overflow-hidden border-b border-white/10">
+    <section className="relative w-full min-h-[35vh] md:min-h-[50vh] flex items-center justify-center bg-black overflow-hidden border-b border-white/10">
       
       {/* BACKGROUND CINEMATOGRÁFICO */}
       <motion.div 
@@ -47,17 +47,17 @@ const Hero: React.FC<HeroProps> = ({ data }) => {
         variants={staggerContainer}
         initial="hidden"
         animate="visible"
-        className="relative z-20 text-center px-6 max-w-5xl py-12"
+        className="relative z-20 text-center px-6 max-w-5xl py-8 md:py-12"
       >
         <motion.div variants={fadeInUp} className="mb-4 flex justify-center">
-            <Logo className="w-48 md:w-64" />
+            <Logo className="w-40 md:w-64" />
         </motion.div>
         
-        <motion.h1 variants={fadeInUp} className="text-2xl md:text-4xl text-white font-light mb-2 tracking-wide leading-tight">
+        <motion.h1 variants={fadeInUp} className="text-xl md:text-4xl text-white font-light mb-2 tracking-wide leading-tight">
           Olá, <span className="font-semibold">{data.client.name}</span>.
         </motion.h1>
 
-        <motion.p variants={fadeInUp} className="text-base md:text-lg text-neutral-400 font-light max-w-2xl mx-auto">
+        <motion.p variants={fadeInUp} className="text-sm md:text-lg text-neutral-400 font-light max-w-2xl mx-auto">
             Configure abaixo o pacote ideal para o seu projeto em <span className="text-white">{data.client.location}</span>.
         </motion.p>
       </motion.div>

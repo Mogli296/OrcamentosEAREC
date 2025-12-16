@@ -1,12 +1,19 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, CheckCircle, Copyright, CreditCard, ArrowLeft, PenTool, MapPin, Settings2, User, Phone, Edit2, Save, X, Banknote, QrCode } from 'lucide-react';
+import { Calendar, CheckCircle, Copyright, CreditCard, ArrowLeft, PenTool, MapPin, Settings2, User, Phone, Edit2, Save, X, Banknote, QrCode, FileText, Check } from 'lucide-react';
 import Logo from '../components/ui/Logo';
 import Button from '../components/ui/Button';
 import AnimatedPrice from '../components/ui/AnimatedPrice';
 import { QuoteData, ClientData } from '../types';
 import { cn } from '../lib/utils';
+
+interface SummaryDetails {
+    serviceName: string;
+    categoryLabel: string;
+    metricLabel: string;
+    addons: string[];
+}
 
 interface SummaryViewProps {
   clientData: ClientData;
@@ -17,6 +24,7 @@ interface SummaryViewProps {
   setPaymentMethod: (method: string) => void;
   onBack: () => void;
   onProceedToSign: () => void;
+  summaryDetails: SummaryDetails; // Nova prop
 }
 
 /**
@@ -34,7 +42,8 @@ const SummaryView: React.FC<SummaryViewProps> = ({
   paymentMethod,
   setPaymentMethod,
   onBack, 
-  onProceedToSign 
+  onProceedToSign,
+  summaryDetails
 }) => {
   const [showContent, setShowContent] = useState(false);
   
@@ -142,7 +151,7 @@ const SummaryView: React.FC<SummaryViewProps> = ({
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 gap-8">
+                <div className="grid grid-cols-1 gap-6">
                     
                     {/* SEÇÃO 1: DADOS DO CLIENTE (EDITÁVEL) */}
                     <motion.div 
@@ -233,6 +242,37 @@ const SummaryView: React.FC<SummaryViewProps> = ({
                                 </div>
                             </div>
                         </div>
+                    </motion.div>
+
+                    {/* SEÇÃO NOVA: RESUMO DO SERVIÇO */}
+                    <motion.div 
+                        layout
+                        className="bg-neutral-900/50 border border-white/10 rounded-lg overflow-hidden"
+                    >
+                         <div className="flex items-center px-6 py-4 bg-white/5 border-b border-white/5">
+                            <h3 className="text-sm font-medium text-white flex items-center gap-2">
+                                <FileText size={14} className="text-brand-DEFAULT" />
+                                Escopo do Projeto
+                            </h3>
+                         </div>
+                         <div className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                            <div>
+                                <p className="text-[10px] text-neutral-500 uppercase tracking-widest mb-1">{summaryDetails.categoryLabel}</p>
+                                <h2 className="text-xl md:text-2xl font-serif text-white">{summaryDetails.serviceName}</h2>
+                                <p className="text-brand-DEFAULT font-medium mt-1">{summaryDetails.metricLabel}</p>
+                            </div>
+                            
+                            {summaryDetails.addons.length > 0 && (
+                                <div className="flex flex-wrap gap-2 md:justify-end">
+                                    {summaryDetails.addons.map((addon, idx) => (
+                                        <span key={idx} className="flex items-center gap-1.5 text-xs bg-white/5 border border-white/10 rounded-full px-3 py-1.5 text-neutral-300">
+                                            <Check size={12} className="text-brand-DEFAULT" />
+                                            {addon}
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
+                         </div>
                     </motion.div>
 
                     {/* SEÇÃO 2: DETALHES DO CONTRATO E PAGAMENTO */}

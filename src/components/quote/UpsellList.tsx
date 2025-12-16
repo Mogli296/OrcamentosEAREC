@@ -85,8 +85,8 @@ const UpsellList: React.FC<UpsellListProps> = ({
   };
 
   return (
-    <section id="configurator" className="py-12 px-4 md:px-8 bg-neutral-900/30 min-h-screen">
-      <div className="max-w-5xl mx-auto space-y-12">
+    <section id="configurator" className="pt-4 pb-12 px-4 md:px-8 bg-neutral-900/30 min-h-screen">
+      <div className="max-w-5xl mx-auto space-y-8">
         
         {/* === 1. NAVEGAÇÃO POR ABAS (TABS) === */}
         <div className="flex flex-wrap justify-center gap-2 md:gap-4 relative z-20">
@@ -142,14 +142,13 @@ const UpsellList: React.FC<UpsellListProps> = ({
                         // Ajuste de posição: Topo alinhado com o card, esquerda ajustada para mobile/desktop
                         className="absolute top-12 left-1/2 -translate-x-1/2 md:left-32 md:translate-x-0 z-30 pointer-events-none"
                     >
-                        {/* Ícone Pulsante (Mouse Pointer) */}
+                        {/* Ícone Pulsante (Mouse Pointer) - Animação de "Toque/Clique" sutil */}
                         <motion.div
                             animate={{ 
-                                y: [0, 15, 0], 
-                                scale: [1, 0.9, 1],
-                                rotate: [0, -10, 0]
+                                scale: [1, 0.9, 1], // Simula o pressionar do botão
+                                rotate: [0, -15, 0] // Leve inclinação para parecer natural
                             }}
-                            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                            transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
                         >
                             <MousePointerClick size={48} className="text-white fill-brand-DEFAULT drop-shadow-[0_5px_15px_rgba(220,38,38,0.6)]" />
                         </motion.div>
@@ -158,10 +157,15 @@ const UpsellList: React.FC<UpsellListProps> = ({
             </AnimatePresence>
 
             {/* === 2. GRID DE SERVIÇOS (RENDERIZAÇÃO CONDICIONAL) === */}
+            {/* 
+                NOTA: Removemos 'auto-rows-fr' para que os cards tenham altura independente.
+                Assim, quando um card expande (info), o vizinho não estica junto.
+                Usamos 'items-start' para alinhar ao topo se houver diferença de altura.
+            */}
             
             {/* CATEGORIA: SOCIAL */}
             {category === 'social' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 auto-rows-fr">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
                     <ServiceCard 
                         active={serviceId === 'birthday'} onClick={() => handleServiceClick('birthday')}
                         icon={Gift} title="Aniversário / Chá" price="R$ 400 (2h)"
@@ -189,7 +193,7 @@ const UpsellList: React.FC<UpsellListProps> = ({
                     {/* Sub-seção: Pacotes Especiais */}
                     <div className="md:col-span-2 pt-4">
                         <p className="text-xs uppercase tracking-widest text-neutral-500 mb-3 ml-1">Pacotes de Casamento</p>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 auto-rows-fr">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
                             <ServiceCard 
                                 active={serviceId === 'wedding_classic'} onClick={() => handleServiceClick('wedding_classic')}
                                 title="Clássico" price="R$ 900"
@@ -218,7 +222,7 @@ const UpsellList: React.FC<UpsellListProps> = ({
 
             {/* CATEGORIA: COMERCIAL */}
             {category === 'commercial' && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-fr">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
                     <ServiceCard 
                         active={serviceId === 'comm_photo'} onClick={() => handleServiceClick('comm_photo')}
                         icon={Camera} title="Fotografia" price="R$ 20 / foto"
@@ -243,7 +247,7 @@ const UpsellList: React.FC<UpsellListProps> = ({
 
             {/* CATEGORIA: ESTÚDIO */}
             {category === 'studio' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 auto-rows-fr">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
                     <ServiceCard 
                         active={serviceId === 'studio_photo'} onClick={() => handleServiceClick('studio_photo')}
                         icon={Camera} title="Ensaio em Estúdio" price="R$ 25 / foto"
@@ -259,7 +263,7 @@ const UpsellList: React.FC<UpsellListProps> = ({
 
             {/* CATEGORIA: PRODUÇÃO */}
             {category === 'video_production' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 auto-rows-fr">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
                     <ServiceCard 
                         active={serviceId === 'edit_only'} onClick={() => handleServiceClick('edit_only')}
                         icon={Zap} title="Apenas Edição" price="R$ 250 / vídeo"

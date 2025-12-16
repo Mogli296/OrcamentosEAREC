@@ -10,7 +10,7 @@ import { formatCurrency } from '../lib/utils';
 import { calculateDistance } from '../lib/maps';
 import { motion, useScroll, useSpring, AnimatePresence } from 'framer-motion';
 import { ClientData, QuoteData, ServiceCategory, ServiceId } from '../types';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, ChevronsDown } from 'lucide-react';
 
 interface QuoteViewProps {
   clientData: ClientData; // Dados vindos do formulário (Nome, Local)
@@ -73,6 +73,17 @@ const QuoteView: React.FC<QuoteViewProps> = ({ clientData, onUpdateClientData, c
   // --- FRAMER MOTION: Barra de Progresso de Scroll ---
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
+  
+  // Controle do indicador de rolagem (Scroll Incentive)
+  const [showScrollIndicator, setShowScrollIndicator] = useState(true);
+
+  // Monitora o scroll para esconder o indicador quando chegar perto do fim
+  useEffect(() => {
+    return scrollYProgress.on('change', (latest) => {
+      if (latest > 0.9) setShowScrollIndicator(false);
+      else setShowScrollIndicator(true);
+    });
+  }, [scrollYProgress]);
   
   // Controle de visibilidade do footer
   const [showFooter, setShowFooter] = useState(true);
@@ -214,8 +225,9 @@ const QuoteView: React.FC<QuoteViewProps> = ({ clientData, onUpdateClientData, c
 
   const handleReset = () => { window.location.reload(); };
 
-  // --- PREPARAÇÃO DE DADOS PARA TELA DE SUCESSO ---
-  // Obtém o label legível do serviço atual para exibir na mensagem final
+  // --- PREPARAÇÃO DE DADOS PARA TELAS (SUMMARY E SUCCESS) ---
+  
+  // 1. Obtém o label legível do serviço atual
   let label = 'Serviço Personalizado';
   if (category === 'social') label = PRICING_TABLE.social[serviceId as keyof typeof PRICING_TABLE.social]?.label || label;
   if (category === 'commercial') {
@@ -225,6 +237,38 @@ const QuoteView: React.FC<QuoteViewProps> = ({ clientData, onUpdateClientData, c
   if (category === 'studio') label = PRICING_TABLE.studio[serviceId as keyof typeof PRICING_TABLE.studio]?.label || label;
   if (category === 'video_production') label = PRICING_TABLE.video_production[serviceId as keyof typeof PRICING_TABLE.video_production]?.label || label;
 
+  // 2. Define a métrica principal (Horas ou Quantidade) para exibição
+  let metricLabel = '';
+  if (category === 'social' && (serviceId === 'birthday' || serviceId === 'fifteen')) {
+    metricLabel = `${hours} Horas de Cobertura`;
+  } else if (category === 'commercial' && serviceId === 'comm_combo') {
+    metricLabel = `Vídeo + ${qty} Fotos`;
+  } else if (category === 'commercial' && serviceId === 'comm_photo') {
+    metricLabel = `${qty} Fotos`;
+  } else if (category === 'studio' && serviceId === 'studio_photo') {
+    metricLabel = `${qty} Fotos`;
+  } else if (category === 'video_production' && serviceId === 'edit_only') {
+    metricLabel = `${qty} Vídeos`;
+  } else if (category === 'custom') {
+    metricLabel = 'Sob medida';
+  } else {
+    metricLabel = 'Taxa Fixa / Diária';
+  }
+
+  // 3. Lista de Adicionais Ativos
+  const activeAddons = [];
+  if (addDrone && category !== 'video_production') activeAddons.push('Drone (Aéreo)');
+  if (addRealTime) activeAddons.push('Fotos Real Time');
+
+  // Objeto de Detalhes para o SummaryView
+  const summaryDetails = {
+    serviceName: label,
+    categoryLabel: category === 'social' ? 'Social' : category === 'commercial' ? 'Comercial' : category === 'studio' ? 'Estúdio' : 'Produção',
+    metricLabel,
+    addons: activeAddons
+  };
+
+  // Objeto de Detalhes para o SuccessView (mantendo compatibilidade)
   const quoteDetails = {
     occasion: category === 'custom' ? 'custom' : (category as any),
     customOccasionText: label,
@@ -233,7 +277,7 @@ const QuoteView: React.FC<QuoteViewProps> = ({ clientData, onUpdateClientData, c
     videoQty: (category === 'video_production' && serviceId === 'edit_only') ? qty : 
               ((category === 'commercial' && (serviceId === 'comm_video' || serviceId === 'comm_combo'))) ? 1 : 0,
     distance,
-    paymentMethod // Adicionado ao objeto de detalhes
+    paymentMethod 
   };
 
   // --- RENDERIZAÇÃO CONDICIONAL DE VIEW ---
@@ -275,6 +319,27 @@ const QuoteView: React.FC<QuoteViewProps> = ({ clientData, onUpdateClientData, c
             />
           </div>
 
+          {/* INDICADOR DE ROLAGEM (Scroll Incentive) */}
+          <AnimatePresence>
+            {showScrollIndicator && (
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed bottom-36 md:bottom-36 left-1/2 -translate-x-1/2 z-30 pointer-events-none text-neutral-500"
+              >
+                 <motion.div
+                    animate={{ y: [0, 8, 0] }}
+                    transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                    className="flex flex-col items-center"
+                 >
+                    {/* Texto removido conforme solicitado */}
+                    <ChevronsDown size={24} />
+                 </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <AnimatePresence>
             {showFooter && (
                 <StickyFooter 
@@ -296,6 +361,7 @@ const QuoteView: React.FC<QuoteViewProps> = ({ clientData, onUpdateClientData, c
                 totalPrice={totalPrice}
                 paymentMethod={paymentMethod}
                 setPaymentMethod={setPaymentMethod}
+                summaryDetails={summaryDetails} // Passando o resumo
                 onBack={() => setViewState('config')}
                 onProceedToSign={() => setIsModalOpen(true)}
             />
