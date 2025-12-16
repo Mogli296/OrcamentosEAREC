@@ -326,15 +326,16 @@ const QuoteView: React.FC<QuoteViewProps> = ({ clientData, onUpdateClientData, c
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed bottom-36 md:bottom-36 left-1/2 -translate-x-1/2 z-30 pointer-events-none text-neutral-500"
+                // Ajustado Z-Index para 50 para ficar acima do footer (z-40)
+                // Alterada cor para branco e adicionado drop-shadow para melhor contraste
+                className="fixed bottom-36 md:bottom-36 left-1/2 -translate-x-1/2 z-50 pointer-events-none text-white drop-shadow-md"
               >
                  <motion.div
                     animate={{ y: [0, 8, 0] }}
                     transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
                     className="flex flex-col items-center"
                  >
-                    {/* Texto removido conforme solicitado */}
-                    <ChevronsDown size={24} />
+                    <ChevronsDown size={28} className="animate-pulse" />
                  </motion.div>
               </motion.div>
             )}

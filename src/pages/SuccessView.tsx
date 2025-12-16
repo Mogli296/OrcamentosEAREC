@@ -135,26 +135,8 @@ Aguardando emissão do contrato.
              </motion.p>
         </motion.div>
 
-        {/* Card de Status do Pedido - Compacto */}
-        <motion.div 
-            variants={fadeInUp}
-            className="bg-white/5 border border-white/10 rounded-lg p-4 mb-8 flex items-center justify-between mx-4"
-        >
-            <div className="flex items-center gap-3">
-                <div className="p-2 bg-yellow-500/10 rounded-full text-yellow-500">
-                    <Clock size={18} />
-                </div>
-                <div className="text-left">
-                    <p className="text-[10px] text-neutral-500 uppercase tracking-wider">Status</p>
-                    <p className="text-white text-sm font-medium">Esperando sua mensagem!</p>
-                </div>
-            </div>
-            {/* Bolinha pulsante */}
-            <div className="h-1.5 w-1.5 rounded-full bg-yellow-500 animate-pulse" />
-        </motion.div>
-
-        {/* Botões de Ação */}
-        <motion.div variants={fadeInUp} className="space-y-3 px-4">
+        {/* Botões de Ação (Trocado de Posição: Agora vem PRIMEIRO) */}
+        <motion.div variants={fadeInUp} className="space-y-3 px-4 mb-8">
             {/* Botão Principal: WhatsApp */}
             <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="block w-full">
                 <Button variant="primary" size="md" className="w-full flex items-center gap-2 justify-center bg-green-600 border-green-600 hover:bg-green-700 shadow-green-900/20 py-4 text-base font-bold tracking-wide">
@@ -167,6 +149,24 @@ Aguardando emissão do contrato.
             <Button onClick={onReset} size="md" variant="secondary" className="w-full py-3 text-sm border-transparent hover:bg-white/5 text-neutral-500 hover:text-white">
                 Voltar ao Início
             </Button>
+        </motion.div>
+
+        {/* Card de Status do Pedido - Compacto (Trocado de Posição: Agora vem DEPOIS) */}
+        <motion.div 
+            variants={fadeInUp}
+            className="bg-white/5 border border-white/10 rounded-lg p-4 flex items-center justify-between mx-4"
+        >
+            <div className="flex items-center gap-3">
+                <div className="p-2 bg-yellow-500/10 rounded-full text-yellow-500">
+                    <Clock size={18} />
+                </div>
+                <div className="text-left">
+                    <p className="text-[10px] text-neutral-500 uppercase tracking-wider">Status</p>
+                    <p className="text-white text-sm font-medium">Esperando sua mensagem!</p>
+                </div>
+            </div>
+            {/* Bolinha pulsante */}
+            <div className="h-1.5 w-1.5 rounded-full bg-yellow-500 animate-pulse" />
         </motion.div>
 
       </motion.div>

@@ -89,34 +89,38 @@ const UpsellList: React.FC<UpsellListProps> = ({
       <div className="max-w-5xl mx-auto space-y-8">
         
         {/* === 1. NAVEGAÇÃO POR ABAS (TABS) === */}
-        <div className="flex flex-wrap justify-center gap-2 md:gap-4 relative z-20">
-            {categories.map((cat) => {
-                const isActive = category === cat.id;
-                const Icon = cat.icon;
-                return (
-                    <button
-                        key={cat.id}
-                        onClick={() => setCategory(cat.id as ServiceCategory)}
-                        className={cn(
-                            "flex items-center gap-2 px-3 py-2 md:px-4 md:py-3 rounded-lg transition-all text-sm md:text-base font-medium flex-1 md:flex-none justify-center whitespace-nowrap",
-                            isActive 
-                                ? cn(
-                                    "bg-brand-DEFAULT text-white shadow-lg shadow-brand-DEFAULT/20",
-                                    // APLICA BORDA BRANCA para destaque (Exceto Custom que tem cor própria)
-                                    cat.id !== 'custom' && "border-2 border-white"
-                                  ) 
-                                : "text-neutral-400 hover:text-white hover:bg-white/5",
-                            // Destaque dourado/vermelho para "Personalizado" quando inativo
-                            cat.highlight && !isActive && "text-brand-DEFAULT hover:bg-brand-DEFAULT/10 border border-brand-DEFAULT/20"
-                        )}
-                    >
-                        <Icon size={18} className="shrink-0" />
-                        <span className="hidden sm:inline">{cat.label}</span>
-                        {/* Versão mobile abreviada do texto */}
-                        <span className="sm:hidden">{cat.label.split(' ')[0]}</span>
-                    </button>
-                )
-            })}
+        <div className="relative z-20 text-center">
+            <p className="text-xs text-neutral-500 uppercase tracking-widest mb-4">Qual a ocasião do serviço?</p>
+            
+            <div className="flex flex-wrap justify-center gap-2 md:gap-4">
+                {categories.map((cat) => {
+                    const isActive = category === cat.id;
+                    const Icon = cat.icon;
+                    return (
+                        <button
+                            key={cat.id}
+                            onClick={() => setCategory(cat.id as ServiceCategory)}
+                            className={cn(
+                                "flex items-center gap-2 px-3 py-2 md:px-4 md:py-3 rounded-lg transition-all text-sm md:text-base font-medium flex-1 md:flex-none justify-center whitespace-nowrap",
+                                isActive 
+                                    ? cn(
+                                        "bg-brand-DEFAULT text-white shadow-lg shadow-brand-DEFAULT/20",
+                                        // APLICA BORDA BRANCA para destaque (Exceto Custom que tem cor própria)
+                                        cat.id !== 'custom' && "border-2 border-white"
+                                    ) 
+                                    : "text-neutral-400 hover:text-white hover:bg-white/5",
+                                // Destaque dourado/vermelho para "Personalizado" quando inativo
+                                cat.highlight && !isActive && "text-brand-DEFAULT hover:bg-brand-DEFAULT/10 border border-brand-DEFAULT/20"
+                            )}
+                        >
+                            <Icon size={18} className="shrink-0" />
+                            <span className="hidden sm:inline">{cat.label}</span>
+                            {/* Versão mobile abreviada do texto */}
+                            <span className="sm:hidden">{cat.label.split(' ')[0]}</span>
+                        </button>
+                    )
+                })}
+            </div>
         </div>
 
         {/* Container dos Cards (Animação de entrada suave ao trocar categoria) */}

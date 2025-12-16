@@ -21,8 +21,8 @@ export const googleCalendarConfig = {
 };
 
 export const mockQuote: QuoteData = {
-  // ID interno do orçamento (pode ser gerado dinamicamente no futuro ou vir de um backend)
-  id: "EAREC-2024-X92",
+  // ID interno do orçamento (gerado dinamicamente com o ano atual)
+  id: `EAREC-${new Date().getFullYear()}-X92`,
   
   // Dados padrão do cliente (estes dados são apenas placeholders, 
   // pois serão substituídos pelo que o usuário digitar na WelcomeView)

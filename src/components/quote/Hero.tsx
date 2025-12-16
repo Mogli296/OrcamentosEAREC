@@ -58,7 +58,7 @@ const Hero: React.FC<HeroProps> = ({ data }) => {
         </motion.h1>
 
         <motion.p variants={fadeInUp} className="text-sm md:text-lg text-neutral-400 font-light max-w-2xl mx-auto">
-            Configure abaixo o pacote ideal para o seu projeto em <span className="text-white">{data.client.location}</span>.
+            Configure seu orçamento gratuitamente!
         </motion.p>
       </motion.div>
     </section>
