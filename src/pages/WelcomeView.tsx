@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
-import { ArrowRight, Calendar, MapPin, User, Smartphone, Lock, CheckCircle2, Loader2, XCircle, AlertCircle, Map as MapIcon } from 'lucide-react';
+import { ArrowRight, Calendar, MapPin, User, Smartphone, CheckCircle2, Loader2, XCircle, AlertCircle, Map as MapIcon, Lock } from 'lucide-react';
 import Logo from '../components/ui/Logo';
 import Button from '../components/ui/Button';
 import LocationMapModal from '../components/ui/LocationMapModal'; // Importando o modal
@@ -10,7 +10,7 @@ import { checkDateAvailability } from '../lib/calendar';
 
 interface WelcomeViewProps {
   onStart: (data: ClientData) => void;
-  onAdminClick: () => void;
+  onAdminClick?: () => void;
 }
 
 // Variantes para a sequência de entrada "Cinematográfica"
@@ -260,17 +260,16 @@ const WelcomeView: React.FC<WelcomeViewProps> = ({ onStart, onAdminClick }) => {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-neutral-900 via-neutral-950 to-black z-0" />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-brand-DEFAULT/5 rounded-full blur-[150px] pointer-events-none" />
 
-      {/* Botão Admin */}
-      <motion.button
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 0.3 }}
-        whileHover={{ opacity: 1, scale: 1.1 }}
-        onClick={onAdminClick}
-        className="absolute top-6 right-6 z-50 text-white p-2"
-        title="Área Administrativa"
-      >
-        <Lock size={16} />
-      </motion.button>
+      {/* Admin Button (Discreet) */}
+      {onAdminClick && (
+        <button 
+          onClick={onAdminClick}
+          className="absolute top-6 right-6 z-50 text-neutral-800 hover:text-white/20 transition-colors p-2 rounded-full"
+          title="Admin"
+        >
+          <Lock size={16} />
+        </button>
+      )}
 
       <motion.div 
         variants={introContainer}
