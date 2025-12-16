@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Lock, Save, DollarSign, LogOut, ShieldAlert, Loader2, KeyRound } from 'lucide-react';
@@ -200,9 +201,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentConfig, onUpdate
         <motion.div 
           initial="hidden" 
           animate="visible" 
-          variants={fadeInUp}
+          variants={staggerContainer} // Container principal
         >
-          <div className="flex items-center justify-between mb-8">
+          <motion.div variants={fadeInUp} className="flex items-center justify-between mb-8">
             <div>
               <h1 className="text-3xl font-serif mb-2">Configuração de Preços</h1>
               <p className="text-neutral-400">Ajuste os valores base utilizados no cálculo automático dos orçamentos.</p>
@@ -210,12 +211,13 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentConfig, onUpdate
             <div className="p-3 bg-brand-DEFAULT/10 rounded-lg text-brand-DEFAULT">
               <DollarSign size={24} />
             </div>
-          </div>
+          </motion.div>
 
-          <div className="bg-white/5 border border-white/5 rounded-xl p-8 space-y-8 shadow-inner">
+          {/* Form Container */}
+          <motion.div variants={fadeInUp} className="bg-white/5 border border-white/5 rounded-xl p-8 space-y-8 shadow-inner">
             
             {/* Base Price */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-8 border-b border-white/5">
+            <motion.div variants={fadeInUp} className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-8 border-b border-white/5">
               <div>
                 <label className="block text-sm font-medium text-white mb-2">Preço Base (Mobilização)</label>
                 <p className="text-xs text-neutral-500">Valor mínimo para saída da equipe. Incluído em todos os orçamentos.</p>
@@ -230,10 +232,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentConfig, onUpdate
                   className="w-full bg-neutral-950 border border-white/10 rounded px-4 py-2 text-white focus:border-brand-DEFAULT focus:outline-none focus:ring-1 focus:ring-brand-DEFAULT transition-all"
                 />
               </div>
-            </div>
+            </motion.div>
 
             {/* Studio Fee */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-8 border-b border-white/5">
+            <motion.div variants={fadeInUp} className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-8 border-b border-white/5">
               <div>
                 <label className="block text-sm font-medium text-white mb-2">Taxa de Estúdio</label>
                 <p className="text-xs text-neutral-500">Adicional cobrado quando o cliente seleciona "Estúdio Controlado".</p>
@@ -248,10 +250,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentConfig, onUpdate
                   className="w-full bg-neutral-950 border border-white/10 rounded px-4 py-2 text-white focus:border-brand-DEFAULT focus:outline-none focus:ring-1 focus:ring-brand-DEFAULT transition-all"
                 />
               </div>
-            </div>
+            </motion.div>
 
             {/* Photo Unit Price */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-8 border-b border-white/5">
+            <motion.div variants={fadeInUp} className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-8 border-b border-white/5">
               <div>
                 <label className="block text-sm font-medium text-white mb-2">Preço por Foto</label>
                 <p className="text-xs text-neutral-500">Valor unitário por fotografia tratada.</p>
@@ -266,10 +268,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentConfig, onUpdate
                   className="w-full bg-neutral-950 border border-white/10 rounded px-4 py-2 text-white focus:border-brand-DEFAULT focus:outline-none focus:ring-1 focus:ring-brand-DEFAULT transition-all"
                 />
               </div>
-            </div>
+            </motion.div>
 
             {/* Video Unit Price */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <motion.div variants={fadeInUp} className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
                 <label className="block text-sm font-medium text-white mb-2">Preço por Vídeo</label>
                 <p className="text-xs text-neutral-500">Valor unitário por vídeo (1 min).</p>
@@ -284,11 +286,11 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentConfig, onUpdate
                   className="w-full bg-neutral-950 border border-white/10 rounded px-4 py-2 text-white focus:border-brand-DEFAULT focus:outline-none focus:ring-1 focus:ring-brand-DEFAULT transition-all"
                 />
               </div>
-            </div>
+            </motion.div>
 
-          </div>
+          </motion.div>
 
-          <div className="mt-8 flex justify-end gap-4">
+          <motion.div variants={fadeInUp} className="mt-8 flex justify-end gap-4">
             <Button variant="secondary" onClick={onExit}>
               Cancelar
             </Button>
@@ -296,10 +298,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentConfig, onUpdate
               <Save size={18} />
               Salvar Alterações
             </Button>
-          </div>
+          </motion.div>
 
           {/* Preview Rápido */}
-          <div className="mt-12 p-6 bg-brand-DEFAULT/5 border border-brand-DEFAULT/10 rounded-lg">
+          <motion.div variants={fadeInUp} className="mt-12 p-6 bg-brand-DEFAULT/5 border border-brand-DEFAULT/10 rounded-lg">
             <h3 className="text-sm font-medium text-brand-DEFAULT mb-4">Simulação Atual</h3>
             <div className="flex justify-between text-sm text-neutral-400">
               <span>Orçamento Básico (Externo + 20 Fotos + 1 Vídeo):</span>
@@ -307,7 +309,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentConfig, onUpdate
                 {formatCurrency(formData.basePrice + (20 * formData.photoUnitPrice) + (1 * formData.videoUnitPrice))}
               </strong>
             </div>
-          </div>
+          </motion.div>
         </motion.div>
       </main>
     </div>

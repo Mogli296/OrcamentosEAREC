@@ -7,6 +7,16 @@ import { googleCalendarConfig } from '../data/mock';
  */
 
 export const checkDateAvailability = async (dateString: string): Promise<{ available: boolean; message?: string }> => {
+  // 1. VERIFICAÇÃO DE DATA NO PASSADO (Regra de Negócio)
+  // Cria datas zerando o horário para comparar apenas o dia
+  const selectedDate = new Date(`${dateString}T00:00:00`);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  if (selectedDate < today) {
+    return { available: false, message: "A data não pode ser no passado." };
+  }
+
   const { apiKey, calendarId } = googleCalendarConfig;
   
   // SIMULAÇÃO / MOCK (Se não houver chaves configuradas)

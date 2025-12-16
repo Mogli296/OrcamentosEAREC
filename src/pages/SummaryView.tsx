@@ -7,6 +7,7 @@ import Button from '../components/ui/Button';
 import AnimatedPrice from '../components/ui/AnimatedPrice';
 import { QuoteData, ClientData } from '../types';
 import { cn } from '../lib/utils';
+import { fadeInUp, staggerContainer } from '../lib/animations';
 
 interface SummaryDetails {
     serviceName: string;
@@ -134,10 +135,16 @@ const SummaryView: React.FC<SummaryViewProps> = ({
              {/* Efeito de Luz no topo */}
              <div className="fixed top-0 left-0 w-full h-1/2 bg-gradient-to-b from-brand-DEFAULT/5 to-transparent pointer-events-none" />
 
-             <div className="max-w-3xl mx-auto relative z-10">
+             {/* Container com Stagger Animation */}
+             <motion.div 
+                className="max-w-3xl mx-auto relative z-10"
+                variants={staggerContainer}
+                initial="hidden"
+                animate="visible"
+             >
                 
                 {/* Header Navigation Compacto */}
-                <div className="flex items-center justify-between mb-8 border-b border-white/5 pb-4">
+                <motion.div variants={fadeInUp} className="flex items-center justify-between mb-8 border-b border-white/5 pb-4">
                     <button 
                         onClick={onBack}
                         className="flex items-center gap-2 text-neutral-500 hover:text-white transition-colors group text-sm"
@@ -149,12 +156,13 @@ const SummaryView: React.FC<SummaryViewProps> = ({
                         <p className="text-xs text-neutral-500 uppercase tracking-widest">Resumo do Pedido</p>
                         <p className="text-white font-serif text-lg">{quoteData.id}</p>
                     </div>
-                </div>
+                </motion.div>
 
                 <div className="grid grid-cols-1 gap-6">
                     
                     {/* SEÇÃO 1: DADOS DO CLIENTE (EDITÁVEL) */}
                     <motion.div 
+                        variants={fadeInUp}
                         layout
                         className="bg-neutral-900/50 border border-white/10 rounded-lg overflow-hidden relative"
                     >
@@ -246,6 +254,7 @@ const SummaryView: React.FC<SummaryViewProps> = ({
 
                     {/* SEÇÃO NOVA: RESUMO DO SERVIÇO */}
                     <motion.div 
+                        variants={fadeInUp}
                         layout
                         className="bg-neutral-900/50 border border-white/10 rounded-lg overflow-hidden"
                     >
@@ -276,9 +285,9 @@ const SummaryView: React.FC<SummaryViewProps> = ({
                     </motion.div>
 
                     {/* SEÇÃO 2: DETALHES DO CONTRATO E PAGAMENTO */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <motion.div variants={fadeInUp} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Termos Legais */}
-                        <div className="bg-white/5 border border-white/10 rounded-lg p-5 flex items-start gap-4">
+                        <div className="bg-white/5 border border-white/10 rounded-lg p-5 flex items-start gap-4 h-full">
                             <div className="mt-1 text-neutral-400"><Copyright size={18} /></div>
                             <div>
                                 <h4 className="text-sm font-medium text-white mb-1">Direitos de Imagem</h4>
@@ -289,7 +298,7 @@ const SummaryView: React.FC<SummaryViewProps> = ({
                         </div>
 
                          {/* SELEÇÃO DE PAGAMENTO */}
-                         <div className="bg-white/5 border border-white/10 rounded-lg p-5">
+                         <div className="bg-white/5 border border-white/10 rounded-lg p-5 h-full">
                             <div className="flex items-center gap-2 mb-3 text-white">
                                 <CreditCard size={18} className="text-neutral-400" />
                                 <h4 className="text-sm font-medium">Forma de Pagamento</h4>
@@ -346,10 +355,10 @@ const SummaryView: React.FC<SummaryViewProps> = ({
                                 {paymentMethod === 'Espécie' && "Pagamento no ato do contrato."}
                             </p>
                         </div>
-                    </div>
+                    </motion.div>
 
                     {/* TOTAL FINAL & AÇÃO */}
-                    <div className="mt-8 pt-8 border-t border-white/10 flex flex-col items-center">
+                    <motion.div variants={fadeInUp} className="mt-8 pt-8 border-t border-white/10 flex flex-col items-center">
                         <p className="text-xs uppercase tracking-widest text-neutral-500 mb-2">Valor Final do Investimento</p>
                         <div className="text-5xl font-serif text-white mb-8 flex items-baseline gap-2">
                             <AnimatedPrice value={totalPrice} />
@@ -373,11 +382,11 @@ const SummaryView: React.FC<SummaryViewProps> = ({
                                 Assinar Contrato
                             </Button>
                         </div>
-                    </div>
+                    </motion.div>
 
                 </div>
 
-             </div>
+             </motion.div>
         </motion.div>
       )}
     </div>

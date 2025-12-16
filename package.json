@@ -15,7 +15,8 @@
     "framer-motion": "^12.23.26",
     "clsx": "^2.1.1",
     "tailwind-merge": "^3.4.0",
-    "react-signature-canvas": "^1.1.0-alpha.2"
+    "react-signature-canvas": "^1.1.0-alpha.2",
+    "leaflet": "1.9.4"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

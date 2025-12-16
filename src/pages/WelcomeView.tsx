@@ -1,9 +1,10 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
-import { ArrowRight, Calendar, MapPin, User, Smartphone, Lock, CheckCircle2, Loader2, XCircle, AlertCircle } from 'lucide-react';
+import { ArrowRight, Calendar, MapPin, User, Smartphone, Lock, CheckCircle2, Loader2, XCircle, AlertCircle, Map as MapIcon } from 'lucide-react';
 import Logo from '../components/ui/Logo';
 import Button from '../components/ui/Button';
+import LocationMapModal from '../components/ui/LocationMapModal'; // Importando o modal
 import { ClientData } from '../types';
 import { checkDateAvailability } from '../lib/calendar';
 
@@ -61,7 +62,9 @@ const SmartInput = ({
   minLength = 3,
   className,
   externalStatus = null, // 'loading', 'valid', 'error', 'idle' ou null (para usar lógica interna)
-  errorMessage = ""
+  errorMessage = "",
+  rightElement = null, // Elemento opcional na direita (ex: botão mapa)
+  ...props // Permite passar outras props como 'min', 'max', etc.
 }: any) => {
   const [internalStatus, setInternalStatus] = useState<'idle' | 'typing' | 'loading' | 'valid'>('idle');
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -100,6 +103,9 @@ const SmartInput = ({
     };
   }, [value, minLength, externalStatus]);
 
+  // Ajusta o padding-right se houver elemento extra
+  const paddingRight = rightElement ? 'pr-20' : 'pr-8';
+
   return (
     <div className="group relative">
       <Icon className="absolute left-0 top-3 text-neutral-500 group-focus-within:text-brand-DEFAULT transition-colors" size={20} />
@@ -110,11 +116,20 @@ const SmartInput = ({
         placeholder={placeholder}
         value={value}
         onChange={onChange}
-        className={`w-full bg-transparent border-b border-white/20 py-3 pl-8 pr-8 text-white focus:outline-none focus:border-brand-DEFAULT transition-colors placeholder:text-neutral-600 ${className} ${status === 'error' ? 'border-red-500/50 text-red-100' : ''}`}
+        className={`w-full bg-transparent border-b border-white/20 py-3 pl-8 ${paddingRight} text-white focus:outline-none focus:border-brand-DEFAULT transition-colors placeholder:text-neutral-600 ${className} ${status === 'error' ? 'border-red-500/50 text-red-100' : ''}`}
+        {...props}
       />
       
+      {/* Elemento Opcional (Botão Mapa) */}
+      {rightElement && (
+          <div className="absolute right-0 top-1.5 z-20">
+              {rightElement}
+          </div>
+      )}
+
+      {/* Ícones de Status (Só aparecem se não houver elemento direito ocupando espaço ou se o status for crítico) */}
       <AnimatePresence mode="wait">
-        {status === 'loading' && (
+        {!rightElement && status === 'loading' && (
           <motion.div
             key="loader"
             initial={{ opacity: 0, scale: 0.5 }}
@@ -126,7 +141,7 @@ const SmartInput = ({
           </motion.div>
         )}
 
-        {status === 'valid' && (
+        {!rightElement && status === 'valid' && (
           <motion.div
             key="success"
             initial={{ scale: 0, opacity: 0 }}
@@ -145,7 +160,7 @@ const SmartInput = ({
              initial={{ scale: 0, opacity: 0 }}
              animate={{ scale: 1, opacity: 1 }}
              exit={{ scale: 0, opacity: 0 }}
-             className="absolute right-0 top-3 text-red-500 drop-shadow-[0_0_8px_rgba(220,38,38,0.5)]"
+             className={`absolute top-3 text-red-500 drop-shadow-[0_0_8px_rgba(220,38,38,0.5)] ${rightElement ? 'right-10' : 'right-0'}`}
            >
              <XCircle size={20} />
            </motion.div>
@@ -179,10 +194,16 @@ const WelcomeView: React.FC<WelcomeViewProps> = ({ onStart, onAdminClick }) => {
     contact: ''
   });
 
+  // Estado para controlar Modal do Mapa
+  const [isMapOpen, setIsMapOpen] = useState(false);
+
   // Estados específicos para validação de data
   const [dateStatus, setDateStatus] = useState<'idle' | 'loading' | 'valid' | 'error'>('idle');
   const [dateMessage, setDateMessage] = useState('');
   const dateTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Calcula a data de hoje para o atributo 'min' (Formato YYYY-MM-DD)
+  const today = new Date().toISOString().split('T')[0];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -210,6 +231,10 @@ const WelcomeView: React.FC<WelcomeViewProps> = ({ onStart, onAdminClick }) => {
             }
         }, 800);
     }
+  };
+
+  const handleLocationSelect = (address: string) => {
+      setFormData(prev => ({ ...prev, location: address }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -267,7 +292,7 @@ const WelcomeView: React.FC<WelcomeViewProps> = ({ onStart, onAdminClick }) => {
           {/* Cabeçalho Ajustado com Restrição de Largura */}
           <div className="flex flex-col items-center mb-6">
             <h2 className="text-lg md:text-xl text-white font-medium">Novo Orçamento</h2>
-            <p className="text-[10px] text-neutral-500 uppercase tracking-widest font-medium mt-1 w-full text-center">(Preencha corretamente)</p>
+            <p className="text-xs text-neutral-500 uppercase tracking-widest font-medium mt-1 w-full text-center">(Preencha corretamente)</p>
           </div>
 
           <div className="space-y-4 md:space-y-5">
@@ -287,6 +312,18 @@ const WelcomeView: React.FC<WelcomeViewProps> = ({ onStart, onAdminClick }) => {
               value={formData.location}
               onChange={handleChange}
               minLength={4}
+              // Botão de Mapa integrado ao Input
+              rightElement={
+                <button 
+                  type="button"
+                  onClick={() => setIsMapOpen(true)}
+                  className="bg-white/10 hover:bg-brand-DEFAULT/20 hover:text-brand-DEFAULT text-neutral-400 p-2 rounded-md transition-all flex items-center gap-1.5 text-xs font-medium border border-white/10"
+                  title="Abrir Mapa"
+                >
+                  <MapIcon size={14} />
+                  <span>Mapa</span>
+                </button>
+              }
             />
 
             <SmartInput 
@@ -296,6 +333,8 @@ const WelcomeView: React.FC<WelcomeViewProps> = ({ onStart, onAdminClick }) => {
               placeholder=""
               value={formData.date}
               onChange={handleChange}
+              // Passa a data mínima para o input nativo
+              min={today}
               // Passa o controle de status para o componente pai (WelcomeView) gerenciar a API
               externalStatus={!formData.date ? 'idle' : dateStatus}
               errorMessage={dateMessage}
@@ -347,6 +386,14 @@ const WelcomeView: React.FC<WelcomeViewProps> = ({ onStart, onAdminClick }) => {
           Experiência Audiovisual High-End
         </motion.p>
       </motion.div>
+
+      {/* Modal de Mapa */}
+      <LocationMapModal 
+        isOpen={isMapOpen}
+        onClose={() => setIsMapOpen(false)}
+        onSelectLocation={handleLocationSelect}
+        initialAddress={formData.location}
+      />
     </div>
   );
 };

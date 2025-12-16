@@ -124,11 +124,12 @@ const UpsellList: React.FC<UpsellListProps> = ({
         </div>
 
         {/* Container dos Cards (Animação de entrada suave ao trocar categoria) */}
+        {/* ALTERAÇÃO: Trocamos o animate fixo por variants={staggerContainer} para cascata */}
         <motion.div 
             key={category}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
+            initial="hidden"
+            animate="visible"
+            variants={staggerContainer}
             className="space-y-8 relative"
         >
             {/* 
@@ -170,32 +171,32 @@ const UpsellList: React.FC<UpsellListProps> = ({
             {/* CATEGORIA: SOCIAL */}
             {category === 'social' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
-                    <ServiceCard 
+                    <motion.div variants={fadeInUp}><ServiceCard 
                         active={serviceId === 'birthday'} onClick={() => handleServiceClick('birthday')}
                         icon={Gift} title="Aniversário / Chá" price="R$ 400 (2h)"
                         desc="Cobertura completa dos parabéns e decoração."
                         details="Inclui 2 horas de cobertura fotográfica. Todas as fotos tratadas entregues via link. Valor de hora extra aplicável. Ideal para Chá Revelação, Mesversário e Aniversários intimistas."
-                    />
-                    <ServiceCard 
+                    /></motion.div>
+                    <motion.div variants={fadeInUp}><ServiceCard 
                         active={serviceId === 'fifteen'} onClick={() => handleServiceClick('fifteen')}
                         icon={Crown} title="15 Anos" price="R$ 400 (2h)"
                         desc="Registro especial do debut."
                         details="Foco na debutante, recepção e valsa. Inclui 2 horas de cobertura base. Fotos ilimitadas durante o período contratado com tratamento de cor profissional."
-                    />
-                    <ServiceCard 
+                    /></motion.div>
+                    <motion.div variants={fadeInUp}><ServiceCard 
                         active={serviceId === 'graduation'} onClick={() => handleServiceClick('graduation')}
                         icon={GraduationCap} title="Formatura" price="R$ 800 (Fixo)"
                         details="Cobertura do evento de colação ou baile. Valor fechado para o evento (sem limite rígido de horas, cobrindo os momentos principais). Entrega digital em alta resolução."
-                    />
-                    <ServiceCard 
+                    /></motion.div>
+                    <motion.div variants={fadeInUp}><ServiceCard 
                         active={serviceId === 'wedding_base'} onClick={() => handleServiceClick('wedding_base')}
                         icon={Heart} title="Casamento (Base)" price="R$ 650"
                         desc="Cerimônia + Decoração + Convidados"
                         details="Cobertura essencial do casamento. Inclui fotos protocolares, decoração, cerimônia religiosa/civil e fotos com padrinhos e convidados."
-                    />
+                    /></motion.div>
                     
                     {/* Sub-seção: Pacotes Especiais */}
-                    <div className="md:col-span-2 pt-4">
+                    <motion.div variants={fadeInUp} className="md:col-span-2 pt-4">
                         <p className="text-xs uppercase tracking-widest text-neutral-500 mb-3 ml-1">Pacotes de Casamento</p>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
                             <ServiceCard 
@@ -220,80 +221,80 @@ const UpsellList: React.FC<UpsellListProps> = ({
                                 highlight
                             />
                         </div>
-                    </div>
+                    </motion.div>
                 </div>
             )}
 
             {/* CATEGORIA: COMERCIAL */}
             {category === 'commercial' && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
-                    <ServiceCard 
+                    <motion.div variants={fadeInUp}><ServiceCard 
                         active={serviceId === 'comm_photo'} onClick={() => handleServiceClick('comm_photo')}
                         icon={Camera} title="Fotografia" price="R$ 20 / foto"
                         desc="Para lojas e gastronomia."
                         details="Valor por foto tratada. Ideal para e-commerce, cardápios e lookbooks."
-                    />
-                    <ServiceCard 
+                    /></motion.div>
+                    <motion.div variants={fadeInUp}><ServiceCard 
                         active={serviceId === 'comm_video'} onClick={() => handleServiceClick('comm_video')}
                         icon={Video} title="Vídeo" price="R$ 500"
                         desc="Captação + Edição (até 1min)."
                         details="Produção de vídeo institucional ou promocional (Reels/TikTok) de até 1 minuto."
-                    />
-                    <ServiceCard 
+                    /></motion.div>
+                    <motion.div variants={fadeInUp}><ServiceCard 
                         active={serviceId === 'comm_combo'} onClick={() => handleServiceClick('comm_combo')}
                         icon={Zap} title="Combo Visual" price="Vídeo + Fotos"
                         desc="Foto + Vídeo (até 1min)"
                         details="O pacote completo para redes sociais. Inclui a produção do vídeo comercial E as fotos dos produtos/espaço. Selecione a quantidade de fotos desejada abaixo."
                         highlight
-                    />
+                    /></motion.div>
                 </div>
             )}
 
             {/* CATEGORIA: ESTÚDIO */}
             {category === 'studio' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-                    <ServiceCard 
+                    <motion.div variants={fadeInUp}><ServiceCard 
                         active={serviceId === 'studio_photo'} onClick={() => handleServiceClick('studio_photo')}
                         icon={Camera} title="Ensaio em Estúdio" price="R$ 25 / foto"
                         details="Sessão fotográfica em ambiente controlado. Iluminação profissional. Valor por foto escolhida e tratada (Skin retouch incluso)."
-                    />
-                    <ServiceCard 
+                    /></motion.div>
+                    <motion.div variants={fadeInUp}><ServiceCard 
                         active={serviceId === 'studio_video'} onClick={() => handleServiceClick('studio_video')}
                         icon={Video} title="Vídeo em Estúdio" price="R$ 350 (2h)"
                         details="Gravação de conteúdo em estúdio (ex: Cursos, Youtube, Entrevistas). Valor referente a diária de 2 horas de estúdio com operador."
-                    />
+                    /></motion.div>
                 </div>
             )}
 
             {/* CATEGORIA: PRODUÇÃO */}
             {category === 'video_production' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
-                    <ServiceCard 
+                    <motion.div variants={fadeInUp}><ServiceCard 
                         active={serviceId === 'edit_only'} onClick={() => handleServiceClick('edit_only')}
                         icon={Zap} title="Apenas Edição" price="R$ 250 / vídeo"
                         details="Você envia o material bruto, nós editamos. Cortes, transições, correção de cor e sound design."
-                    />
-                    <ServiceCard 
+                    /></motion.div>
+                    <motion.div variants={fadeInUp}><ServiceCard 
                         active={serviceId === 'cam_cap'} onClick={() => handleServiceClick('cam_cap')}
                         icon={Video} title="Captação Câmera" price="R$ 350"
                         details="Operador de câmera profissional com equipamento de cinema (4K). Valor por serviço/diária (até 6h)."
-                    />
-                    <ServiceCard 
+                    /></motion.div>
+                    <motion.div variants={fadeInUp}><ServiceCard 
                         active={serviceId === 'mobile_cap'} onClick={() => handleServiceClick('mobile_cap')}
                         icon={SmartphoneIcon} title="Captação Celular" price="R$ 250"
                         details="Captação ágil com iPhone de última geração. Ideal para bastidores e conteúdo nativo para Stories/TikTok."
-                    />
-                    <ServiceCard 
+                    /></motion.div>
+                    <motion.div variants={fadeInUp}><ServiceCard 
                         active={serviceId === 'drone'} onClick={() => handleServiceClick('drone')}
                         icon={Plane} title="Drone" price="R$ 250"
                         details="Imagens aéreas em 4K. Inclui 2 baterias de voo. Operador licenciado."
-                    />
+                    /></motion.div>
                 </div>
             )}
 
             {/* CATEGORIA: PERSONALIZADO */}
             {category === 'custom' && (
-                <div className="bg-white/5 border border-white/10 p-8 rounded-xl text-center group transition-colors hover:border-white/20">
+                <motion.div variants={fadeInUp} className="bg-white/5 border border-white/10 p-8 rounded-xl text-center group transition-colors hover:border-white/20">
                     <motion.div
                         animate={{ scale: [1, 1.2, 1], opacity: [1, 0.8, 1] }}
                         transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
@@ -315,7 +316,7 @@ const UpsellList: React.FC<UpsellListProps> = ({
                         <MessageCircle size={16} />
                         Fale conosco clicando aqui
                     </a>
-                </div>
+                </motion.div>
             )}
 
 
@@ -323,7 +324,7 @@ const UpsellList: React.FC<UpsellListProps> = ({
             
             {/* Seletor de HORAS (Apenas para categorias temporais: Aniversário/15 Anos) */}
             {(serviceId === 'birthday' || serviceId === 'fifteen') && category === 'social' && (
-                <div className="bg-white/5 p-8 rounded-xl border border-white/10 flex flex-col items-center">
+                <motion.div variants={fadeInUp} className="bg-white/5 p-8 rounded-xl border border-white/10 flex flex-col items-center">
                     <div className="flex items-center gap-2 text-white mb-6">
                         <Clock className="text-brand-DEFAULT" />
                         <span className="font-serif text-xl">Duração do Evento</span>
@@ -342,7 +343,7 @@ const UpsellList: React.FC<UpsellListProps> = ({
                         <button onClick={() => setHours(hours + 1)} className="p-4 bg-white/10 rounded-full hover:bg-white/20 transition-colors"><Plus size={24} /></button>
                     </div>
                     <p className="text-xs text-neutral-500 mt-6 bg-black/30 px-3 py-1 rounded-full text-center">Incluso 2h base. +R$ 250/h extra.</p>
-                </div>
+                </motion.div>
             )}
 
             {/* Seletor de QUANTIDADE (Para itens unitários: Fotos, Edições) */}
@@ -351,7 +352,7 @@ const UpsellList: React.FC<UpsellListProps> = ({
                 serviceId === 'studio_photo' || 
                 serviceId === 'edit_only'
              ) && (
-                <div className="bg-white/5 p-8 rounded-xl border border-white/10 flex flex-col items-center shadow-2xl">
+                <motion.div variants={fadeInUp} className="bg-white/5 p-8 rounded-xl border border-white/10 flex flex-col items-center shadow-2xl">
                     <div className="flex items-center gap-2 text-white mb-6">
                         <Camera className="text-brand-DEFAULT" />
                         <span className="font-serif text-xl">Quantidade de {serviceId === 'edit_only' ? 'Vídeos' : 'Fotos'}</span>
@@ -388,13 +389,14 @@ const UpsellList: React.FC<UpsellListProps> = ({
                         </button>
                     </div>
                     <p className="text-xs text-neutral-500 mt-6">Ajuste de 5 em 5 unidades.</p>
-                </div>
+                </motion.div>
             )}
 
             {/* ADICIONAIS (Checkboxes) - Social Only */}
             {category === 'social' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div 
+                    <motion.div 
+                        variants={fadeInUp}
                         onClick={() => setAddRealTime(!addRealTime)}
                         className={cn("cursor-pointer p-4 rounded-lg border flex items-center gap-4 transition-all", addRealTime ? "bg-brand-DEFAULT/20 border-brand-DEFAULT" : "bg-white/5 border-white/10")}
                     >
@@ -405,9 +407,10 @@ const UpsellList: React.FC<UpsellListProps> = ({
                             <p className="text-white font-medium">Fotos Real Time (+ R$ 600)</p>
                             <p className="text-xs text-neutral-400">Entrega imediata durante o evento.</p>
                         </div>
-                    </div>
+                    </motion.div>
 
-                    <div 
+                    <motion.div 
+                        variants={fadeInUp}
                         onClick={() => setAddDrone(!addDrone)}
                         className={cn("cursor-pointer p-4 rounded-lg border flex items-center gap-4 transition-all", addDrone ? "bg-brand-DEFAULT/20 border-brand-DEFAULT" : "bg-white/5 border-white/10")}
                     >
@@ -418,14 +421,14 @@ const UpsellList: React.FC<UpsellListProps> = ({
                             <p className="text-white font-medium">Imagens de Drone (+ R$ 250)</p>
                             <p className="text-xs text-neutral-400">Perspectivas aéreas cinematográficas.</p>
                         </div>
-                    </div>
+                    </motion.div>
                 </div>
             )}
         </motion.div>
 
         {/* LOGÍSTICA (Compacta) */}
         {!isNoTravelCost && (
-            <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-6">
+            <motion.div variants={fadeInUp} className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-6">
                 <div className="flex items-center gap-4">
                     <div className="p-3 bg-white/5 rounded-full"><Route size={20} className="text-brand-DEFAULT" /></div>
                     <div>
@@ -437,15 +440,15 @@ const UpsellList: React.FC<UpsellListProps> = ({
                     <p className="text-xs text-neutral-500 uppercase">Taxa de Deslocamento</p>
                     <p className="text-xl text-white font-mono">{travelCost > 0 ? formatCurrency(travelCost) : "Grátis"}</p>
                 </div>
-            </div>
+            </motion.div>
         )}
         
         {isNoTravelCost && category !== 'custom' && (
-             <div className="border-t border-white/10 pt-8 text-center">
+             <motion.div variants={fadeInUp} className="border-t border-white/10 pt-8 text-center">
                 <span className="text-xs text-green-500 bg-green-500/10 px-3 py-1 rounded-full border border-green-500/20">
                     Deslocamento Gratuito (Estúdio)
                 </span>
-             </div>
+             </motion.div>
         )}
 
       </div>
@@ -483,7 +486,7 @@ const ServiceCard = ({ active, onClick, icon: Icon, title, price, desc, details,
                             animate={active ? { scale: [1, 1.2, 1] } : { scale: 1 }}
                             transition={{ duration: 0.5 }}
                         >
-                            {/* Ícone agora sempre com a cor da marca (brand-DEFAULT) para destaque */}
+                            {/* Ícone agora sempre com a cor da marca (brand-DEFAULT) para destaque (Vermelho) */}
                             <Icon size={24} className="mb-2 text-brand-DEFAULT" />
                         </motion.div>
                     )}
