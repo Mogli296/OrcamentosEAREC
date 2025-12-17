@@ -59,14 +59,14 @@ const BackgroundFilmStrips: React.FC = () => {
     <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden h-screen w-screen">
       {/* 
         === FILME DE CÂMERA VERMELHO (GLOBAL) === 
-        Opacidade ajustada para 0.06 (6%) - Extremamente sutil/ambiente
+        Opacidade reduzida para 0.5 (50%) na animação para garantir suavidade.
       */}
       
       {/* Tira Superior Direita */}
       <motion.div
         initial={{ opacity: 0, x: 100, rotate: -35 }}
         animate={{ 
-            opacity: 1, 
+            opacity: 0.5, // FIX: Reduzido de 1 para 0.5 (50%)
             x: 0,
             y: [0, -20, 0] // Flutuação lenta do container
         }}
@@ -74,7 +74,7 @@ const BackgroundFilmStrips: React.FC = () => {
             opacity: { duration: 1.5 },
             y: { duration: 15, repeat: Infinity, ease: "easeInOut" }
         }}
-        className="absolute -top-20 -right-20 md:right-0 w-32 md:w-48 h-[120vh] text-brand-DEFAULT opacity-[0.06]"
+        className="absolute -top-20 -right-20 md:right-0 w-32 md:w-48 h-[120vh] text-brand-DEFAULT"
       >
          {/* Speed 45s por loop = Movimento de "deriva" muito lento */}
          <FilmStripTexture className="w-full h-full drop-shadow-[0_0_15px_rgba(220,38,38,0.2)]" speed={45} direction={1} />
@@ -84,7 +84,7 @@ const BackgroundFilmStrips: React.FC = () => {
       <motion.div
         initial={{ opacity: 0, x: -100, rotate: -35 }}
         animate={{ 
-            opacity: 1, 
+            opacity: 0.5, // FIX: Reduzido de 1 para 0.5 (50%)
             x: 0,
             y: [0, 20, 0] // Flutuação lenta inversa
         }}
@@ -92,7 +92,7 @@ const BackgroundFilmStrips: React.FC = () => {
             opacity: { duration: 1.5 },
             y: { duration: 18, repeat: Infinity, ease: "easeInOut", delay: 1 }
         }}
-        className="absolute -bottom-20 -left-20 md:left-0 w-32 md:w-48 h-[120vh] text-brand-DEFAULT opacity-[0.06]"
+        className="absolute -bottom-20 -left-20 md:left-0 w-32 md:w-48 h-[120vh] text-brand-DEFAULT"
       >
          {/* Speed 60s por loop = Movimento quase estático/ambiente */}
          <FilmStripTexture className="w-full h-full drop-shadow-[0_0_15px_rgba(220,38,38,0.2)]" speed={60} direction={-1} />

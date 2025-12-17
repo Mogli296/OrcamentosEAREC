@@ -4,7 +4,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import QuoteView from './src/pages/QuoteView';
 import WelcomeView from './src/pages/WelcomeView';
 import IntroView from './src/pages/IntroView';
-import LandingView from './src/pages/LandingView';
 import AdminDashboard from './src/pages/AdminDashboard';
 import Loading from './src/components/ui/Loading';
 import Logo from './src/components/ui/Logo';
@@ -14,13 +13,13 @@ import { mockQuote } from './src/data/mock';
 import { delay } from './src/lib/utils';
 
 // Definição dos estados possíveis da aplicação
-type ViewState = 'landing' | 'intro' | 'welcome' | 'quote' | 'admin';
+type ViewState = 'intro' | 'welcome' | 'quote' | 'admin';
 
 const App: React.FC = () => {
   // --- GERENCIAMENTO DE ESTADO GLOBAL ---
 
   const [showSplash, setShowSplash] = useState(true);
-  const [view, setView] = useState<ViewState>('landing');
+  const [view, setView] = useState<ViewState>('intro');
   const [isLoading, setIsLoading] = useState(false);
   const [config, setConfig] = useState<QuoteData>(mockQuote);
 
@@ -77,7 +76,7 @@ const App: React.FC = () => {
   return (
     <main className="w-full min-h-screen bg-black text-neutral-100 selection:bg-brand-DEFAULT selection:text-white overflow-x-hidden font-sans relative">
       {/* 
-          CONDICIONAL: FilmStrips aparecem nas telas iniciais ('landing', 'intro', 'welcome')
+          CONDICIONAL: FilmStrips aparecem nas telas iniciais ('intro', 'welcome')
           OU na tela final de sucesso (isQuoteSuccess).
           Eles SOMEM durante a configuração do orçamento (view === 'quote' && !isQuoteSuccess)
       */}
@@ -123,14 +122,9 @@ const App: React.FC = () => {
       <div className="relative z-10">
         {!showSplash && !isLoading && (
             <>
-            {view === 'landing' && (
-                <LandingView onNext={() => setView('intro')} />
-            )}
-
             {view === 'intro' && (
                 <IntroView 
                     onContinue={() => setView('welcome')} 
-                    onBack={() => setView('landing')} 
                 />
             )}
 

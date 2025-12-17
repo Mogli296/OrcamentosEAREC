@@ -1,13 +1,12 @@
 
 import React from 'react';
 import { motion, Variants } from 'framer-motion';
-import { ArrowRight, Instagram, MousePointerClick, ArrowLeft } from 'lucide-react';
+import { ArrowRight, Instagram, MousePointerClick } from 'lucide-react';
 import Logo from '../components/ui/Logo';
 import Button from '../components/ui/Button';
 
 interface IntroViewProps {
   onContinue: () => void;
-  onBack?: () => void;
 }
 
 // Reutilizando variantes para consistência visual
@@ -31,19 +30,10 @@ const itemVariants: Variants = {
   }
 };
 
-const IntroView: React.FC<IntroViewProps> = ({ onContinue, onBack }) => {
+const IntroView: React.FC<IntroViewProps> = ({ onContinue }) => {
   return (
     <div className="w-full h-screen flex flex-col items-center justify-center relative overflow-hidden px-6">
       
-      {onBack && (
-          <button 
-            onClick={onBack}
-            className="fixed top-6 left-6 z-[60] text-neutral-400 hover:text-white flex items-center gap-2 transition-colors text-sm uppercase tracking-wider bg-black/20 p-2 rounded-lg backdrop-blur-sm hover:bg-black/50"
-          >
-             <ArrowLeft size={18} /> Voltar
-          </button>
-      )}
-
       {/* 
         REMOVIDO: Vignette/Overlays 
         Fundo transparente para mostrar o bg-black e filmstrips do App.tsx 
@@ -74,7 +64,7 @@ const IntroView: React.FC<IntroViewProps> = ({ onContinue, onBack }) => {
                     <Button variant="glass" className="w-full justify-center hover:border-brand-DEFAULT/50 transition-colors gap-4 py-6 bg-black/40 backdrop-blur-sm">
                         <span className="flex items-center gap-3">
                             <Instagram size={20} className="text-brand-DEFAULT" />
-                            <span className="font-serif italic text-lg">Você não conhece a EAREC?</span>
+                            <span className="font-serif italic text-lg">Conheça a EAREC</span>
                         </span>
                         <span className="text-xs font-bold text-white group-hover:text-brand-DEFAULT transition-colors flex items-center gap-2">
                             CLIQUE AQUI <ArrowRight size={14} />
@@ -109,7 +99,10 @@ const IntroView: React.FC<IntroViewProps> = ({ onContinue, onBack }) => {
                         }}
                     />
 
-                    <Button variant="primary" className="w-full justify-center items-center gap-4 py-6 group relative overflow-hidden z-10 shadow-[0_0_20px_rgba(220,38,38,0.4)]">
+                    <Button 
+                        variant="primary" 
+                        className="w-full justify-center items-center gap-4 py-6 group relative overflow-hidden z-10 shadow-[0_0_20px_rgba(220,38,38,0.4)] bg-brand-DEFAULT/80 backdrop-blur-sm"
+                    >
                         <span className="font-serif italic text-lg text-center">Faça seu orçamento gratuitamente!</span>
                         
                         <div className="flex items-center gap-3">

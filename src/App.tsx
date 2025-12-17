@@ -4,7 +4,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import QuoteView from './src/pages/QuoteView';
 import WelcomeView from './src/pages/WelcomeView';
 import IntroView from './src/pages/IntroView';
-import LandingView from './src/pages/LandingView';
 import AdminDashboard from './src/pages/AdminDashboard';
 import Loading from './src/components/ui/Loading';
 import Logo from './src/components/ui/Logo';
@@ -13,16 +12,19 @@ import { ClientData, QuoteData, QuoteState } from './src/types';
 import { mockQuote } from './src/data/mock';
 import { delay } from './src/lib/utils';
 
-// Definição dos estados possíveis da aplicação
-type ViewState = 'landing' | 'intro' | 'welcome' | 'quote' | 'admin';
+// Definição dos estados possíveis da aplicação (Landing removido)
+type ViewState = 'intro' | 'welcome' | 'quote' | 'admin';
 
 const App: React.FC = () => {
   // --- GERENCIAMENTO DE ESTADO GLOBAL ---
 
   const [showSplash, setShowSplash] = useState(true);
-  const [view, setView] = useState<ViewState>('landing');
+  const [view, setView] = useState<ViewState>('intro'); // Estado inicial agora é 'intro'
   const [isLoading, setIsLoading] = useState(false);
   const [config, setConfig] = useState<QuoteData>(mockQuote);
+
+  // Estado para controlar se o orçamento foi concluído (tela de sucesso)
+  const [isQuoteSuccess, setIsQuoteSuccess] = useState(false);
 
   // PERSISTÊNCIA DE DADOS (Evitar perda ao recarregar)
   const [clientData, setClientData] = useState<ClientData | null>(() => {
@@ -59,6 +61,8 @@ const App: React.FC = () => {
   const handleStart = async (data: ClientData) => {
     setClientData(data);
     setIsLoading(true);
+    // Reset estado de sucesso ao iniciar novo fluxo
+    setIsQuoteSuccess(false);
     await delay(2000); 
     setIsLoading(false);
     setView('quote');
@@ -71,7 +75,12 @@ const App: React.FC = () => {
 
   return (
     <main className="w-full min-h-screen bg-black text-neutral-100 selection:bg-brand-DEFAULT selection:text-white overflow-x-hidden font-sans relative">
-      <BackgroundFilmStrips />
+      {/* 
+          CONDICIONAL: FilmStrips aparecem nas telas iniciais ('intro', 'welcome')
+          OU na tela final de sucesso (isQuoteSuccess).
+          Eles SOMEM durante a configuração do orçamento (view === 'quote' && !isQuoteSuccess)
+      */}
+      {(view !== 'quote' || isQuoteSuccess) && <BackgroundFilmStrips />}
 
       <AnimatePresence mode="wait">
         {showSplash && (
@@ -113,14 +122,12 @@ const App: React.FC = () => {
       <div className="relative z-10">
         {!showSplash && !isLoading && (
             <>
-            {view === 'landing' && (
-                <LandingView onNext={() => setView('intro')} />
-            )}
+            {/* LandingView foi removido daqui */}
 
             {view === 'intro' && (
                 <IntroView 
                     onContinue={() => setView('welcome')} 
-                    onBack={() => setView('landing')} 
+                    // onBack removido pois é a tela inicial
                 />
             )}
 
@@ -140,6 +147,7 @@ const App: React.FC = () => {
                   onBack={() => setView('welcome')}
                   quoteState={quoteState}
                   setQuoteState={setQuoteState}
+                  onSuccess={() => setIsQuoteSuccess(true)}
                 />
             )}
 

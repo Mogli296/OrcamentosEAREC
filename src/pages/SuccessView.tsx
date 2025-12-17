@@ -59,6 +59,7 @@ const SuccessView: React.FC<SuccessViewProps> = ({ onReset, clientData, totalPri
 
 👤 *DADOS DO CLIENTE*
 *Nome:* ${clientData.name}
+*Contato:* ${clientData.contact}
 *Local:* ${clientData.location}
 
 🎬 *DETALHES DO SERVIÇO*
