@@ -214,10 +214,12 @@ const SummaryView: React.FC<SummaryViewProps> = ({
                                     <div 
                                         key={idx} 
                                         className={cn(
-                                            "flex justify-between items-center text-sm py-1 border-b border-white/5 hover:bg-white/5 px-2 -mx-2 rounded transition-colors group cursor-default",
-                                            item.type === 'freight' ? "text-neutral-400 italic" : "text-neutral-200"
+                                            "flex justify-between items-center text-sm py-1 border-b border-white/5 px-2 -mx-2 rounded transition-colors group",
+                                            item.type === 'freight' ? "text-neutral-400 italic cursor-default" : "text-neutral-200",
+                                            item.type === 'addon' ? "hover:bg-white/5 cursor-pointer" : ""
                                         )}
                                         onDoubleClick={() => {
+                                            // FIX: Permite remoção apenas para itens adicionais (addons), não deslocamento ou base.
                                             if (item.type === 'addon' && onRemoveAddon) {
                                                 onRemoveAddon(item.label);
                                             }
@@ -245,7 +247,8 @@ const SummaryView: React.FC<SummaryViewProps> = ({
                                          <p className="text-[10px] text-neutral-500 uppercase tracking-widest mb-1">Total Final</p>
                                          <p className="text-2xl text-white font-serif"><AnimatedPrice value={totalPrice} /></p>
                                     </div>
-                                    {summaryDetails.addons.length > 0 && (
+                                    {/* FIX: Mostra a dica apenas se houver addons removíveis na lista */}
+                                    {priceBreakdown.some(i => i.type === 'addon') && (
                                         <p className="text-[9px] text-neutral-600 italic max-w-[150px] text-right">
                                             Dica: Clique duas vezes em um item adicional para removê-lo.
                                         </p>

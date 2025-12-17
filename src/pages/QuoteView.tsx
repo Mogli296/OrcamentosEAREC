@@ -20,16 +20,12 @@ interface QuoteViewProps {
   onBack: () => void;
   quoteState: QuoteState;
   setQuoteState: React.Dispatch<React.SetStateAction<QuoteState>>;
-  onSuccess: () => void; // Callback para indicar sucesso e alterar o fundo global
+  onSuccess: () => void; 
 }
 
 type ViewState = 'config' | 'summary' | 'success';
 
-/**
- * TABELA DE PREÇOS (Hardcoded Logic)
- */
 const PRICING_TABLE = {
-    // Nova Categoria: Casamento
     wedding: {
         wedding_base: { base: 650, label: "Casamento (Base)" },
         wedding_classic: { base: 900, label: "Pacote Clássico" },
@@ -37,7 +33,6 @@ const PRICING_TABLE = {
         wedding_essence: { base: 1750, label: "Pacote Essência" },
         realtime: { fixed: 600, label: "Fotos em Tempo Real" }
     },
-    // Categoria Social
     social: {
         birthday: { base: 400, hoursIncluded: 2, hourPrice: 250, label: "Chá Revelação / Aniversário" },
         fifteen: { base: 450, hoursIncluded: 2, hourPrice: 250, label: "15 Anos" }, 
@@ -93,13 +88,11 @@ const QuoteView: React.FC<QuoteViewProps> = ({
 
   const [distance, setDistance] = useState<number>(0); 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isMapOpen, setIsMapOpen] = useState(false); // Estado para o modal do mapa
+  const [isMapOpen, setIsMapOpen] = useState(false); 
   const [isApproved, setIsApproved] = useState(false);
 
-  // Destruturando o estado vindo do App.tsx
   const { category, serviceId, hours, qty, addDrone, addRealTime } = quoteState;
 
-  // Helpers para atualizar o estado global
   const setCategory = (c: ServiceCategory) => setQuoteState(prev => ({ ...prev, category: c }));
   const setServiceId = (s: ServiceId) => setQuoteState(prev => ({ ...prev, serviceId: s }));
   const setHours = (h: number) => setQuoteState(prev => ({ ...prev, hours: h }));
@@ -123,40 +116,23 @@ const QuoteView: React.FC<QuoteViewProps> = ({
       onUpdateClientData({ ...clientData, location: address });
   };
 
-  /**
-   * CÁLCULO DE PREÇO & BREAKDOWN
-   */
   const { totalPrice, priceBreakdown } = useMemo(() => {
     let total = 0;
     let breakdown: { label: string; value: number; type: 'base' | 'addon' | 'freight' }[] = [];
 
-    // ETAPA 1: Cálculo do Serviço Principal
     if (category === 'wedding') {
         const s = PRICING_TABLE.wedding;
         let baseVal = 0;
         let baseLabel = "";
 
         switch (serviceId) {
-            case 'wedding_base': 
-                baseVal = s.wedding_base.base; 
-                baseLabel = s.wedding_base.label;
-                break;
-            case 'wedding_classic': 
-                baseVal = s.wedding_classic.base; 
-                baseLabel = s.wedding_classic.label;
-                break;
-            case 'wedding_romance': 
-                baseVal = s.wedding_romance.base; 
-                baseLabel = s.wedding_romance.label;
-                break;
-            case 'wedding_essence': 
-                baseVal = s.wedding_essence.base; 
-                baseLabel = s.wedding_essence.label;
-                break;
+            case 'wedding_base': baseVal = s.wedding_base.base; baseLabel = s.wedding_base.label; break;
+            case 'wedding_classic': baseVal = s.wedding_classic.base; baseLabel = s.wedding_classic.label; break;
+            case 'wedding_romance': baseVal = s.wedding_romance.base; baseLabel = s.wedding_romance.label; break;
+            case 'wedding_essence': baseVal = s.wedding_essence.base; baseLabel = s.wedding_essence.label; break;
         }
         total += baseVal;
         breakdown.push({ label: baseLabel, value: baseVal, type: 'base' });
-
         if (addRealTime) {
             total += s.realtime.fixed;
             breakdown.push({ label: s.realtime.label, value: s.realtime.fixed, type: 'addon' });
@@ -168,7 +144,6 @@ const QuoteView: React.FC<QuoteViewProps> = ({
             const ref = serviceId === 'birthday' ? s.birthday : s.fifteen;
             total += ref.base;
             breakdown.push({ label: `${ref.label} (2h)`, value: ref.base, type: 'base' });
-            
             if (hours > ref.hoursIncluded) {
                 const extraHoursVal = (hours - ref.hoursIncluded) * ref.hourPrice;
                 total += extraHoursVal;
@@ -178,7 +153,6 @@ const QuoteView: React.FC<QuoteViewProps> = ({
              total += s.graduation.base;
              breakdown.push({ label: s.graduation.label, value: s.graduation.base, type: 'base' });
         }
-
         if (addRealTime) {
             total += s.realtime.fixed;
             breakdown.push({ label: s.realtime.label, value: s.realtime.fixed, type: 'addon' });
@@ -234,19 +208,13 @@ const QuoteView: React.FC<QuoteViewProps> = ({
         breakdown.push({ label: "Projeto Personalizado", value: 0, type: 'base' });
     }
 
-    // ETAPA 2: Adicionais Globais (Drone)
     if (addDrone && category !== 'video_production' && category !== 'custom') { 
          const dronePrice = PRICING_TABLE.video_production.drone.fixed;
          total += dronePrice; 
          breakdown.push({ label: "Drone (Imagens Aéreas)", value: dronePrice, type: 'addon' });
     }
 
-    // ETAPA 3: Logística (Frete)
-    const isExemptFromTravel = 
-        category === 'studio' || 
-        category === 'custom' || 
-        serviceId === 'edit_only';
-
+    const isExemptFromTravel = category === 'studio' || category === 'custom' || serviceId === 'edit_only';
     if (!isExemptFromTravel) {
         if (distance > 0) {
             const freight = (distance * 2 * quoteData.pricePerKm);
@@ -256,17 +224,12 @@ const QuoteView: React.FC<QuoteViewProps> = ({
              breakdown.push({ label: "Deslocamento", value: 0, type: 'freight' });
         }
     }
-
     return { totalPrice: total, priceBreakdown: breakdown };
   }, [category, serviceId, hours, qty, addDrone, addRealTime, distance, quoteData.pricePerKm]);
 
-  // Effect: Resetar inputs quantitativos ao trocar de categoria
   useEffect(() => {
-      // Se trocarmos de categoria, resetamos para o padrão daquela categoria
-      // Mas verificamos se o serviceId atual pertence à categoria nova, senão resetamos
       const currentCategoryGroup = Object.keys(PRICING_TABLE[category as keyof typeof PRICING_TABLE]);
       const isIdValid = currentCategoryGroup.some(key => key === serviceId);
-
       if (!isIdValid) {
         if (category === 'wedding') setServiceId('wedding_base');
         if (category === 'social') setServiceId('birthday');
@@ -274,20 +237,14 @@ const QuoteView: React.FC<QuoteViewProps> = ({
         if (category === 'studio') setServiceId('studio_photo');
         if (category === 'video_production') setServiceId('edit_only');
         if (category === 'custom') setServiceId('custom_project');
-        
         setHours(2);
-        if (category === 'video_production') {
-            setQty(1);
-        } else {
-            setQty(10);
-        }
+        if (category === 'video_production') setQty(1); else setQty(10);
       }
   }, [category]);
 
   const handleSignatureSuccess = (signatureData: string) => {
     setIsModalOpen(false);
     setIsApproved(true);
-    // Notifica o App para reativar o fundo de filmstrip
     onSuccess();
     setViewState('success');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -295,13 +252,15 @@ const QuoteView: React.FC<QuoteViewProps> = ({
 
   const handleReset = () => { window.location.reload(); };
 
+  // FIX: Função de remoção aprimorada para permitir o reset de Horas Extras e remoção de Drone/Tempo Real.
+  // Deslocamento (freight) não é removido aqui para cumprir a regra de segurança.
   const handleRemoveAddon = (addonName: string) => {
-      if (addonName.includes('Drone')) setAddDrone(false);
-      if (addonName.includes('Tempo Real')) setAddRealTime(false);
+      const name = addonName.toLowerCase();
+      if (name.includes('drone')) setAddDrone(false);
+      if (name.includes('tempo real')) setAddRealTime(false);
+      if (name.includes('horas extras')) setHours(2); // Reseta para a carga horária base incluída (2h)
   };
 
-  // --- PREPARAÇÃO DE DADOS PARA TELAS ---
-  
   let label = 'Serviço Personalizado';
   if (category === 'wedding') label = PRICING_TABLE.wedding[serviceId as keyof typeof PRICING_TABLE.wedding]?.label || label;
   if (category === 'social') label = PRICING_TABLE.social[serviceId as keyof typeof PRICING_TABLE.social]?.label || label;
@@ -313,25 +272,15 @@ const QuoteView: React.FC<QuoteViewProps> = ({
   if (category === 'video_production') label = PRICING_TABLE.video_production[serviceId as keyof typeof PRICING_TABLE.video_production]?.label || label;
 
   let metricLabel = '';
-  if (category === 'wedding') {
-      metricLabel = 'Pacote Completo';
-  } else if (category === 'social' && (serviceId === 'birthday' || serviceId === 'fifteen')) {
-    metricLabel = `${hours} Horas de Cobertura`;
-  } else if (category === 'commercial' && serviceId === 'comm_combo') {
-    metricLabel = `Vídeo + ${qty} Fotos`;
-  } else if (category === 'commercial' && serviceId === 'comm_photo') {
-    metricLabel = `${qty} Fotos`;
-  } else if (category === 'studio' && serviceId === 'studio_photo') {
-    metricLabel = `${qty} Fotos`;
-  } else if (category === 'studio' && serviceId === 'studio_video') {
-    metricLabel = `${hours} Horas de Gravação`;
-  } else if (category === 'video_production' && serviceId === 'edit_only') {
-    metricLabel = `${qty} Vídeos`;
-  } else if (category === 'custom') {
-    metricLabel = 'Sob medida';
-  } else {
-    metricLabel = 'Taxa Fixa / Diária';
-  }
+  if (category === 'wedding') metricLabel = 'Pacote Completo';
+  else if (category === 'social' && (serviceId === 'birthday' || serviceId === 'fifteen')) metricLabel = `${hours} Horas de Cobertura`;
+  else if (category === 'commercial' && serviceId === 'comm_combo') metricLabel = `Vídeo + ${qty} Fotos`;
+  else if (category === 'commercial' && serviceId === 'comm_photo') metricLabel = `${qty} Fotos`;
+  else if (category === 'studio' && serviceId === 'studio_photo') metricLabel = `${qty} Fotos`;
+  else if (category === 'studio' && serviceId === 'studio_video') metricLabel = `${hours} Horas de Gravação`;
+  else if (category === 'video_production' && serviceId === 'edit_only') metricLabel = `${qty} Vídeos`;
+  else if (category === 'custom') metricLabel = 'Sob medida';
+  else metricLabel = 'Taxa Fixa / Diária';
 
   const activeAddons = [];
   if (addDrone && category !== 'video_production') activeAddons.push('Drone (Aéreo)');
@@ -374,14 +323,20 @@ const QuoteView: React.FC<QuoteViewProps> = ({
             style={{ scaleX }}
           />
           
-          {/* Botão Voltar */}
-          <button 
-            onClick={onBack}
-            className="fixed top-6 left-6 z-[60] text-neutral-400 hover:text-white flex items-center gap-2 transition-colors text-sm uppercase tracking-wider bg-black/20 p-2 rounded-lg backdrop-blur-sm hover:bg-black/50 shadow-lg border border-white/5"
-            title="Voltar ao Início"
-          >
-             <ArrowLeft size={18} /> Voltar
-          </button>
+          <AnimatePresence>
+              {viewState === 'config' && (
+                  <motion.button 
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    onClick={onBack}
+                    className="fixed top-6 left-6 z-[60] text-neutral-400 hover:text-white flex items-center gap-2 transition-colors text-sm uppercase tracking-wider bg-black/20 p-2 rounded-lg backdrop-blur-sm hover:bg-black/50 shadow-lg border border-white/5"
+                    title="Voltar ao Cadastro"
+                  >
+                     <ArrowLeft size={18} /> Voltar
+                  </motion.button>
+              )}
+          </AnimatePresence>
 
           <Hero data={quoteData} />
           
