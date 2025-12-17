@@ -56,10 +56,21 @@ const SummaryView: React.FC<SummaryViewProps> = ({
 
   const handleSave = () => { onUpdateClientData(tempData); setIsEditing(false); };
   const handleCancel = () => { setTempData(clientData); setIsEditing(false); };
+  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+
+    // LÓGICA DE CONTATO: Apenas Números e Limite de Caracteres
+    if (name === 'contact') {
+        const numericValue = value.replace(/\D/g, ''); // Remove tudo que não for dígito
+        if (numericValue.length > 15) return; // Limite de caracteres
+        setTempData(prev => ({ ...prev, [name]: numericValue }));
+        return;
+    }
+
     setTempData(prev => ({ ...prev, [name]: value }));
   };
+  
   const handleLocationSelect = (address: string) => {
       setTempData(prev => ({ ...prev, location: address }));
   };
@@ -165,7 +176,14 @@ const SummaryView: React.FC<SummaryViewProps> = ({
                                 <div className="space-y-1">
                                     <label className="text-[10px] text-neutral-500 uppercase tracking-widest">Contato</label>
                                     {isEditing ? (
-                                        <input name="contact" value={tempData.contact} onChange={handleChange} className="w-full bg-transparent border-b border-brand-DEFAULT text-white py-1 focus:outline-none" />
+                                        <input 
+                                            name="contact" 
+                                            type="tel"
+                                            value={tempData.contact} 
+                                            onChange={handleChange} 
+                                            placeholder="Apenas números"
+                                            className="w-full bg-transparent border-b border-brand-DEFAULT text-white py-1 focus:outline-none" 
+                                        />
                                     ) : ( <p className="text-white font-medium flex items-center gap-2"><Phone size={12} className="text-neutral-500" />{clientData.contact}</p> )}
                                 </div>
                             </div>

@@ -70,7 +70,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <main className="w-full min-h-screen bg-[#020202] text-neutral-100 selection:bg-brand-DEFAULT selection:text-white overflow-x-hidden font-sans relative">
+    <main className="w-full min-h-screen bg-black text-neutral-100 selection:bg-brand-DEFAULT selection:text-white overflow-x-hidden font-sans relative">
       <BackgroundFilmStrips />
 
       <AnimatePresence mode="wait">

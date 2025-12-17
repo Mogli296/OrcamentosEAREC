@@ -5,7 +5,7 @@ import {
   Camera, Video, Gift, Crown, GraduationCap, Heart, 
   Store, Aperture, Plane, Clock, Zap, Minus, Plus, Route, Star, CircleHelp, X, MessageCircle, Hand, CheckCircle2, HeartHandshake, Sparkles, Gem, Timer, Edit
 } from 'lucide-react';
-import { formatCurrency, cn } from '../../lib/utils';
+import { formatCurrency, cn, smoothScrollTo } from '../../lib/utils';
 import { fadeInUp, staggerContainer } from '../../lib/animations';
 import { ServiceCategory, ServiceId } from '../../types';
 import AnimatedNumber from '../ui/AnimatedNumber';
@@ -75,16 +75,30 @@ const UpsellList: React.FC<UpsellListProps> = ({
     setServiceId(id);
     handleInteraction();
     
-    // Auto-scroll para duração do evento se for 15 anos
-    if (id === 'fifteen') {
-        setTimeout(() => {
-            document.getElementById('duration-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 200);
-    }
+    // Auto-scroll Genérico: Verifica se o serviço selecionado exibe controles de quantidade/horas
+    setTimeout(() => {
+        // Lógica para Duração (Hours)
+        const needsDuration = 
+            (category === 'social' && (id === 'birthday' || id === 'fifteen')) || 
+            (category === 'studio' && id === 'studio_video');
+
+        // Lógica para Quantidade (Qty)
+        const needsQty = 
+            (category === 'commercial' && (id === 'comm_photo' || id === 'comm_combo')) || 
+            id === 'studio_photo' || 
+            (category === 'video_production' && id === 'edit_only');
+
+        if (needsDuration) {
+            smoothScrollTo('duration-card');
+        } else if (needsQty) {
+            smoothScrollTo('qty-card');
+        }
+    }, 250); // Pequeno delay para garantir que o React renderizou o card
   };
 
   useEffect(() => {
-    if (category !== 'social' && category !== 'wedding') setShowTutorial(false);
+    // Se a categoria mudar para algo que não seja o default, consideramos interação
+    if (category !== 'wedding' && showTutorial) setShowTutorial(false);
   }, [category]);
 
   const showHoursControl = (
@@ -123,6 +137,28 @@ const UpsellList: React.FC<UpsellListProps> = ({
                                 <span className="hidden sm:inline">{cat.label}</span>
                                 <span className="sm:hidden">{cat.label.split(' ')[0]}</span>
                             </button>
+
+                            {/* 
+                                Animação de Mão (Tutorial Click)
+                                Z-Index: 100 (para sobrepor)
+                                Posição: -bottom-5 (subiu de -bottom-10)
+                            */}
+                            <AnimatePresence>
+                                {showTutorial && cat.id === 'social' && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 0.6, y: 0, scale: [1, 0.9, 1] }} 
+                                        exit={{ opacity: 0, scale: 0.5 }}
+                                        transition={{
+                                            y: { duration: 0.5 },
+                                            scale: { repeat: Infinity, duration: 1.5, ease: "easeInOut" }
+                                        }}
+                                        className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-white pointer-events-none z-[100] flex flex-col items-center drop-shadow-2xl"
+                                    >
+                                         <Hand className="fill-white/20 rotate-[-15deg] drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]" size={32} />
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
                     )
                 })}
@@ -370,7 +406,11 @@ const UpsellList: React.FC<UpsellListProps> = ({
                 serviceId === 'studio_photo' || 
                 serviceId === 'edit_only'
              ) && (
-                <motion.div variants={fadeInUp} className="bg-neutral-900/40 p-8 rounded-xl border border-white/10 flex flex-col items-center shadow-2xl backdrop-blur-sm">
+                <motion.div 
+                    id="qty-card"
+                    variants={fadeInUp} 
+                    className="bg-neutral-900/40 p-8 rounded-xl border border-white/10 flex flex-col items-center shadow-2xl backdrop-blur-sm"
+                >
                     <div className="flex items-center gap-2 text-white mb-6">
                         <Camera className="text-brand-DEFAULT" />
                         <span className="font-serif text-xl">Quantidade de {serviceId === 'edit_only' ? 'Vídeos' : 'Fotos'}</span>

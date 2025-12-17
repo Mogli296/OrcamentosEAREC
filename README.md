@@ -16,10 +16,11 @@ Uma plataforma de orçamentos projetada para encantar clientes premium. Muito al
 
 ## ✨ Features Principais
 
-*   **🎬 Cinematic UX:** Animações fluidas, transições de estado, feedback tátil e visual rico.
-*   **💰 Precificação Dinâmica:** Motor de cálculo em tempo real que considera tipo de evento, horas, quantidade de mídia e adicionais.
+*   **🎬 Cinematic UX:** Fundo dinâmico com FilmStrips, transições de estado, feedback tátil e animações suaves.
+*   **💰 Precificação Dinâmica:** Motor de cálculo em tempo real que considera tipo de evento, horas, quantidade de mídia e adicionais (Drone, Tempo Real).
 *   **🗺️ Logística Inteligente:** Integração com OpenStreetMap (Nominatim) para cálculo automático de frete baseado na distância real de condução.
 *   **📅 Validação de Agenda:** Integração segura com Google Calendar (suporte a .env).
+*   **✍️ Assinatura Digital:** Modal de assinatura manuscrita para aprovação formal.
 *   **🔐 Painel Administrativo:** Área segura para ajuste de preços base sem necessidade de deploy.
 *   **📱 Mobile First:** Design responsivo e otimizado para qualquer dispositivo.
 
@@ -27,7 +28,7 @@ Uma plataforma de orçamentos projetada para encantar clientes premium. Muito al
 
 ## 🏗 Arquitetura do Projeto
 
-O projeto segue uma arquitetura **SPA (Single Page Application)** leve, onde a navegação é controlada por uma máquina de estados finita no componente raiz. Isso garante transições instantâneas e uma sensação de "App Nativo".
+O projeto segue uma arquitetura **SPA (Single Page Application)** leve, onde a navegação é controlada por uma máquina de estados finita no componente raiz. Isso garante transições instantâneas.
 
 ### 📂 Estrutura de Diretórios
 
@@ -35,11 +36,11 @@ O projeto segue uma arquitetura **SPA (Single Page Application)** leve, onde a n
 src/
 ├── components/           # Blocos de Construção da UI
 │   ├── quote/            # Componentes de Negócio (Lógica de Venda)
-│   │   ├── UpsellList    # Seletor visual de serviços e adicionais
+│   │   ├── UpsellList    # Seletor visual de serviços e adicionais (Tutorial Interativo)
 │   │   ├── StickyFooter  # Barra de totalização e ação
 │   │   ├── Hero          # Cabeçalho imersivo com vídeo
 │   │   └── Moodboard     # Galeria visual (Parallax)
-│   └── ui/               # Design System (Botões, Inputs, Logos)
+│   └── ui/               # Design System (Botões, Inputs, Logos, FilmStrips)
 │
 ├── data/                 # Camada de Dados
 │   └── mock.ts           # Configurações iniciais e preços default
@@ -50,10 +51,11 @@ src/
 │   └── animations.ts     # Variantes do Framer Motion centralizadas
 │
 ├── pages/                # Telas Principais (Views)
-│   ├── IntroView.tsx     # Landing page minimalista
+│   ├── IntroView.tsx     # Landing page com opções iniciais
 │   ├── WelcomeView.tsx   # Formulário de captação de dados
 │   ├── QuoteView.tsx     # O "Cérebro" da aplicação (Configurador)
 │   ├── SummaryView.tsx   # Revisão e fechamento
+│   └── SuccessView.tsx   # Mensagem final e link WhatsApp
 │   └── AdminDashboard.tsx# Painel de controle protegido
 │
 └── types/                # Definições de Tipo (TypeScript)
@@ -66,11 +68,12 @@ src/
 
 A aplicação não utiliza rotas tradicionais (`react-router`). O estado `view` em `App.tsx` controla o fluxo:
 
-1.  **`intro`**: Tela inicial de boas-vindas.
+1.  **`intro`**: Tela inicial de boas-vindas com fundo de filmstrip.
 2.  **`welcome`**: Coleta dados do cliente (Nome, Local, Data). Valida disponibilidade.
-3.  **`quote`**: Onde a mágica acontece. O usuário monta o pacote. O sistema calcula frete e totais em tempo real.
+3.  **`quote`**: Onde a mágica acontece. O usuário monta o pacote. 
+    *   *Nota:* O fundo de FilmStrip é ocultado aqui para foco total nos valores.
 4.  **`summary`**: Revisão final, edição de dados e escolha de pagamento.
-5.  **`success`**: Gera a mensagem formatada para o WhatsApp e finaliza o fluxo.
+5.  **`success`**: Gera a mensagem formatada para o WhatsApp. O fundo de FilmStrip retorna para o encerramento.
 
 ---
 

@@ -20,6 +20,7 @@ interface QuoteViewProps {
   onBack: () => void;
   quoteState: QuoteState;
   setQuoteState: React.Dispatch<React.SetStateAction<QuoteState>>;
+  onSuccess: () => void; // Callback para indicar sucesso e alterar o fundo global
 }
 
 type ViewState = 'config' | 'summary' | 'success';
@@ -65,7 +66,7 @@ const PRICING_TABLE = {
 
 const QuoteView: React.FC<QuoteViewProps> = ({ 
     clientData, onUpdateClientData, config, onBack, 
-    quoteState, setQuoteState 
+    quoteState, setQuoteState, onSuccess 
 }) => {
   const [viewState, setViewState] = useState<ViewState>('config');
   
@@ -286,6 +287,8 @@ const QuoteView: React.FC<QuoteViewProps> = ({
   const handleSignatureSuccess = (signatureData: string) => {
     setIsModalOpen(false);
     setIsApproved(true);
+    // Notifica o App para reativar o fundo de filmstrip
+    onSuccess();
     setViewState('success');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };

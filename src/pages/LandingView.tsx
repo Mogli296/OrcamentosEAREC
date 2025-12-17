@@ -14,8 +14,10 @@ const LandingView: React.FC<LandingViewProps> = ({ onNext }) => {
   return (
     <div className="w-full h-screen flex flex-col items-center justify-center relative overflow-hidden px-6">
       
-      {/* Background Decorativo Base - Usando pretos mais profundos e transparência */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-black/20 via-black/80 to-black z-0" />
+      {/* 
+        REMOVIDO: Vignette/Overlays 
+        Fundo transparente para mostrar o bg-black e filmstrips do App.tsx 
+      */}
       
       {/* CONTEÚDO PRINCIPAL */}
       <motion.div 
@@ -44,7 +46,7 @@ const LandingView: React.FC<LandingViewProps> = ({ onNext }) => {
                 className="group px-12 py-4 text-lg tracking-widest bg-white/5 border-white/10 hover:bg-brand-DEFAULT hover:border-brand-DEFAULT transition-all duration-500 shadow-2xl backdrop-blur-sm"
             >
                 <span className="flex items-center gap-3">
-                    CONTINUAR 
+                    INICIAR 
                     <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform duration-300" />
                 </span>
             </Button>

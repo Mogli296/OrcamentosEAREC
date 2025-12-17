@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
  * Componente SVG: Tira de Filme (Film Strip)
  * Renderiza uma tira vertical infinita usando patterns SVG.
  */
-const FilmStripTexture = ({ className }: { className?: string }) => (
+const FilmStripTexture = ({ className, speed = 2, direction = 1 }: { className?: string, speed?: number, direction?: number }) => (
   <svg
     viewBox="0 0 100 800"
     fill="none"
@@ -14,13 +14,6 @@ const FilmStripTexture = ({ className }: { className?: string }) => (
     className={className}
     preserveAspectRatio="none"
   >
-    {/* Fundo sutil da tira */}
-    <rect x="15" width="70" height="800" fill="currentColor" fillOpacity="0.05" />
-    
-    {/* Bordas da área de imagem */}
-    <line x1="18" y1="0" x2="18" y2="800" stroke="currentColor" strokeWidth="1" strokeOpacity="0.5" />
-    <line x1="82" y1="0" x2="82" y2="800" stroke="currentColor" strokeWidth="1" strokeOpacity="0.5" />
-
     {/* Definição do Padrão de Furos (Sprockets) e Quadros */}
     <defs>
       <pattern id="film-holes" x="0" y="0" width="100" height="60" patternUnits="userSpaceOnUse">
@@ -32,9 +25,32 @@ const FilmStripTexture = ({ className }: { className?: string }) => (
          <line x1="18" y1="59" x2="82" y2="59" stroke="currentColor" strokeWidth="2" strokeOpacity="0.2" />
       </pattern>
     </defs>
+
+    {/* Fundo sutil da tira (Estático relativo ao container) */}
+    <rect x="15" width="70" height="800" fill="currentColor" fillOpacity="0.05" />
     
-    {/* Aplicação do padrão */}
-    <rect width="100" height="800" fill="url(#film-holes)" />
+    {/* Bordas da área de imagem */}
+    <line x1="18" y1="0" x2="18" y2="800" stroke="currentColor" strokeWidth="1" strokeOpacity="0.5" />
+    <line x1="82" y1="0" x2="82" y2="800" stroke="currentColor" strokeWidth="1" strokeOpacity="0.5" />
+    
+    {/* 
+        ANIMAÇÃO DE ROLAGEM (Rolling Effect)
+        O rect preenchido com o padrão move-se de 0 a -60 (altura do padrão).
+        Como o padrão repete, isso cria um loop infinito perfeito.
+        Height aumentado para 1000 para cobrir o deslocamento.
+    */}
+    <motion.rect 
+      x="0"
+      width="100" 
+      height="1000" 
+      fill="url(#film-holes)"
+      animate={{ y: direction > 0 ? [0, -60] : [-60, 0] }}
+      transition={{ 
+        repeat: Infinity, 
+        ease: "linear", 
+        duration: speed 
+      }}
+    />
   </svg>
 );
 
@@ -43,7 +59,7 @@ const BackgroundFilmStrips: React.FC = () => {
     <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden h-screen w-screen">
       {/* 
         === FILME DE CÂMERA VERMELHO (GLOBAL) === 
-        Opacidade ajustada para manter visibilidade em fundo preto.
+        Opacidade ajustada para 0.06 (6%) - Extremamente sutil/ambiente
       */}
       
       {/* Tira Superior Direita */}
@@ -52,16 +68,16 @@ const BackgroundFilmStrips: React.FC = () => {
         animate={{ 
             opacity: 1, 
             x: 0,
-            y: [0, -20, 0] // Flutuação lenta
+            y: [0, -20, 0] // Flutuação lenta do container
         }}
         transition={{ 
             opacity: { duration: 1.5 },
-            y: { duration: 8, repeat: Infinity, ease: "easeInOut" }
+            y: { duration: 15, repeat: Infinity, ease: "easeInOut" }
         }}
-        // Opacidade aumentada para 25% para melhor contraste no preto
-        className="absolute -top-20 -right-20 md:right-0 w-32 md:w-48 h-[120vh] text-brand-DEFAULT opacity-25"
+        className="absolute -top-20 -right-20 md:right-0 w-32 md:w-48 h-[120vh] text-brand-DEFAULT opacity-[0.06]"
       >
-         <FilmStripTexture className="w-full h-full drop-shadow-[0_0_15px_rgba(220,38,38,0.3)]" />
+         {/* Speed 45s por loop = Movimento de "deriva" muito lento */}
+         <FilmStripTexture className="w-full h-full drop-shadow-[0_0_15px_rgba(220,38,38,0.2)]" speed={45} direction={1} />
       </motion.div>
 
       {/* Tira Inferior Esquerda */}
@@ -74,20 +90,16 @@ const BackgroundFilmStrips: React.FC = () => {
         }}
         transition={{ 
             opacity: { duration: 1.5 },
-            y: { duration: 9, repeat: Infinity, ease: "easeInOut", delay: 1 }
+            y: { duration: 18, repeat: Infinity, ease: "easeInOut", delay: 1 }
         }}
-        // Opacidade aumentada para 25%
-        className="absolute -bottom-20 -left-20 md:left-0 w-32 md:w-48 h-[120vh] text-brand-DEFAULT opacity-25"
+        className="absolute -bottom-20 -left-20 md:left-0 w-32 md:w-48 h-[120vh] text-brand-DEFAULT opacity-[0.06]"
       >
-         <FilmStripTexture className="w-full h-full drop-shadow-[0_0_15px_rgba(220,38,38,0.3)]" />
+         {/* Speed 60s por loop = Movimento quase estático/ambiente */}
+         <FilmStripTexture className="w-full h-full drop-shadow-[0_0_15px_rgba(220,38,38,0.2)]" speed={60} direction={-1} />
       </motion.div>
 
-      {/* Elemento de brilho central global - Reduzido para não "lavar" o preto */}
-      <motion.div 
-        animate={{ opacity: [0.02, 0.08, 0.02] }}
-        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[80vh] bg-brand-DEFAULT/5 rounded-full blur-[120px] pointer-events-none" 
-      />
+      {/* CAMADA DE ESCURECIMENTO (30% OPACIDADE) */}
+      <div className="absolute inset-0 bg-black/30 pointer-events-none" />
     </div>
   );
 };

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import QuoteView from './src/pages/QuoteView';
@@ -22,6 +23,9 @@ const App: React.FC = () => {
   const [view, setView] = useState<ViewState>('landing');
   const [isLoading, setIsLoading] = useState(false);
   const [config, setConfig] = useState<QuoteData>(mockQuote);
+
+  // Estado para controlar se o orçamento foi concluído (tela de sucesso)
+  const [isQuoteSuccess, setIsQuoteSuccess] = useState(false);
 
   // PERSISTÊNCIA DE DADOS (Evitar perda ao recarregar)
   const [clientData, setClientData] = useState<ClientData | null>(() => {
@@ -58,6 +62,8 @@ const App: React.FC = () => {
   const handleStart = async (data: ClientData) => {
     setClientData(data);
     setIsLoading(true);
+    // Reset estado de sucesso ao iniciar novo fluxo
+    setIsQuoteSuccess(false);
     await delay(2000); 
     setIsLoading(false);
     setView('quote');
@@ -69,8 +75,13 @@ const App: React.FC = () => {
   };
 
   return (
-    <main className="w-full min-h-screen bg-neutral-950 text-neutral-100 selection:bg-brand-DEFAULT selection:text-white overflow-x-hidden font-sans relative">
-      <BackgroundFilmStrips />
+    <main className="w-full min-h-screen bg-black text-neutral-100 selection:bg-brand-DEFAULT selection:text-white overflow-x-hidden font-sans relative">
+      {/* 
+          CONDICIONAL: FilmStrips aparecem nas telas iniciais ('landing', 'intro', 'welcome')
+          OU na tela final de sucesso (isQuoteSuccess).
+          Eles SOMEM durante a configuração do orçamento (view === 'quote' && !isQuoteSuccess)
+      */}
+      {(view !== 'quote' || isQuoteSuccess) && <BackgroundFilmStrips />}
 
       <AnimatePresence mode="wait">
         {showSplash && (
@@ -139,6 +150,7 @@ const App: React.FC = () => {
                   onBack={() => setView('welcome')}
                   quoteState={quoteState}
                   setQuoteState={setQuoteState}
+                  onSuccess={() => setIsQuoteSuccess(true)}
                 />
             )}
 

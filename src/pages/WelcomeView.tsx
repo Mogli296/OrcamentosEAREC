@@ -125,8 +125,14 @@ const WelcomeView: React.FC<WelcomeViewProps> = ({ onStart, onAdminClick, onBack
     const { name, value } = e.target;
 
     if (name === 'contact') {
-        // Limite de 15 caracteres
-        if (value.length > 15) return;
+        // LÓGICA DE CONTATO: Apenas Números
+        const numericValue = value.replace(/\D/g, ''); // Remove tudo que não for dígito
+        
+        // Limite simples para evitar overflow (ex: DDD + 9 digitos = 11, + margem)
+        if (numericValue.length > 15) return;
+        
+        setFormData({ ...formData, [name]: numericValue });
+        return;
     }
 
     if (name === 'date') {
@@ -168,7 +174,8 @@ const WelcomeView: React.FC<WelcomeViewProps> = ({ onStart, onAdminClick, onBack
     }
   };
 
-  const isFormValid = formData.name.length > 2 && formData.location.length > 3 && formData.date.length > 0 && dateStatus === 'valid' && formData.contact.length > 5;
+  // Validação: Contato precisa ter pelo menos 8 dígitos
+  const isFormValid = formData.name.length > 2 && formData.location.length > 3 && formData.date.length > 0 && dateStatus === 'valid' && formData.contact.length >= 8;
 
   return (
     <div className="w-full min-h-[100dvh] flex flex-col items-center justify-center relative overflow-hidden px-6 py-12">
@@ -181,10 +188,10 @@ const WelcomeView: React.FC<WelcomeViewProps> = ({ onStart, onAdminClick, onBack
           </button>
       )}
 
-      {/* Overlays mais profundos para o modo escuro */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/70 to-black z-0" />
-      {/* Brilho reduzido */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-brand-DEFAULT/5 rounded-full blur-[150px] pointer-events-none" />
+      {/* 
+         REMOVIDO: Vignette e Overlays de Fundo
+         O fundo agora é 100% transparente para mostrar o bg-black e os filmstrips sutis do App.tsx 
+      */}
 
       <motion.div variants={introContainer} initial="hidden" animate="visible" className="relative z-10 w-full max-w-md">
         <motion.div variants={logoVariant} className="flex justify-center mb-8 md:mb-10">
@@ -235,7 +242,7 @@ const WelcomeView: React.FC<WelcomeViewProps> = ({ onStart, onAdminClick, onBack
 
             <SmartInput 
               icon={Calendar}
-              iconColor="text-brand-DEFAULT" // Botão calendário vermelho
+              // REMOVIDO: iconColor="text-brand-DEFAULT" para ficar branco/cinza padrão
               name="date"
               type="date"
               placeholder=""
@@ -244,16 +251,18 @@ const WelcomeView: React.FC<WelcomeViewProps> = ({ onStart, onAdminClick, onBack
               min={today}
               externalStatus={!formData.date ? 'idle' : dateStatus}
               errorMessage={dateMessage}
-              className="[&::-webkit-calendar-picker-indicator]:opacity-60 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+              // CORREÇÃO: SVG agora com stroke #FFFFFF (Branco) para parecer com o botão do mapa
+              className="[&::-webkit-calendar-picker-indicator]:bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20stroke%3D%22%23FFFFFF%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20viewBox%3D%220%200%2024%2024%22%3E%3Crect%20x%3D%223%22%20y%3D%224%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%222%22%20ry%3D%222%22%2F%3E%3Cline%20x1%3D%2216%22%20y1%3D%222%22%20x2%3D%2216%22%20y2%3D%226%22%2F%3E%3Cline%20x1%3D%228%22%20y1%3D%222%22%20x2%3D%228%22%20y2%3D%226%22%2F%3E%3Cline%20x1%3D%223%22%20y1%3D%2210%22%20x2%3D%2221%22%20y2%3D%2210%22%2F%3E%3C%2Fsvg%3E')] [&::-webkit-calendar-picker-indicator]:bg-no-repeat [&::-webkit-calendar-picker-indicator]:bg-center [&::-webkit-calendar-picker-indicator]:w-5 [&::-webkit-calendar-picker-indicator]:h-5 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-100"
             />
 
             <SmartInput 
               icon={Smartphone}
               name="contact"
-              placeholder="Whatsapp ou Email"
+              type="tel" // Teclado numérico no mobile
+              placeholder="Whatsapp (Somente Números)"
               value={formData.contact}
               onChange={handleChange}
-              minLength={5}
+              minLength={8}
             />
           </div>
 

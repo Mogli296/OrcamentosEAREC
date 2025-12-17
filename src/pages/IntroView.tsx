@@ -44,8 +44,10 @@ const IntroView: React.FC<IntroViewProps> = ({ onContinue, onBack }) => {
           </button>
       )}
 
-      {/* Background Decorativo Local (Sutil) - Escurecido */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/60 to-black z-0 pointer-events-none" />
+      {/* 
+        REMOVIDO: Vignette/Overlays 
+        Fundo transparente para mostrar o bg-black e filmstrips do App.tsx 
+      */}
 
       <motion.div 
         variants={containerVariants}
