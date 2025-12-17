@@ -4,7 +4,7 @@ import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { ArrowRight, Calendar, MapPin, User, Smartphone, CheckCircle2, Loader2, XCircle, AlertCircle, Map as MapIcon, Lock } from 'lucide-react';
 import Logo from '../components/ui/Logo';
 import Button from '../components/ui/Button';
-import LocationMapModal from '../components/ui/LocationMapModal'; // Importando o modal
+import LocationMapModal from '../components/ui/LocationMapModal';
 import { ClientData } from '../types';
 import { checkDateAvailability } from '../lib/calendar';
 
@@ -202,24 +202,34 @@ const WelcomeView: React.FC<WelcomeViewProps> = ({ onStart, onAdminClick }) => {
   const [dateMessage, setDateMessage] = useState('');
   const dateTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Calcula a data de hoje para o atributo 'min' (Formato YYYY-MM-DD)
-  const today = new Date().toISOString().split('T')[0];
+  // CORREÇÃO DATA MOBILE: Calcula a data local (Brazil) para o atributo 'min'.
+  // toISOString() usa UTC, o que à noite no Brasil já pode ser "amanhã", 
+  // mas 'en-CA' (YYYY-MM-DD) respeita o timezone local do browser.
+  const today = new Date().toLocaleDateString('en-CA');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
 
-    // Lógica Específica para Data (Integração Google Calendar)
+    // Lógica Específica para Data
     if (name === 'date') {
+        // CORREÇÃO: Bloqueia imediatamente seleção de data passada se o browser permitir
+        if (value && value < today) {
+            setDateStatus('error');
+            setDateMessage("A data não pode ser anterior a hoje.");
+            setFormData({ ...formData, [name]: value }); // Atualiza para o usuário ver o erro
+            return;
+        }
+
         if (!value) {
             setDateStatus('idle');
+            setFormData({ ...formData, [name]: value });
             return;
         }
 
         setDateStatus('loading');
         if (dateTimeoutRef.current) clearTimeout(dateTimeoutRef.current);
 
-        // Debounce para não chamar a API a cada digitação (embora date picker seja geralmente um evento só)
+        // Debounce para API
         dateTimeoutRef.current = setTimeout(async () => {
             const result = await checkDateAvailability(value);
             if (result.available) {
@@ -231,6 +241,8 @@ const WelcomeView: React.FC<WelcomeViewProps> = ({ onStart, onAdminClick }) => {
             }
         }, 800);
     }
+    
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleLocationSelect = (address: string) => {
@@ -239,12 +251,12 @@ const WelcomeView: React.FC<WelcomeViewProps> = ({ onStart, onAdminClick }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.name && formData.contact && dateStatus !== 'error') {
+    if (formData.name && formData.contact && dateStatus === 'valid') {
       onStart(formData);
     }
   };
 
-  // Validação geral do formulário (inclui verificação se a data é válida/disponível)
+  // Validação geral do formulário
   const isFormValid = formData.name.length > 2 && 
                       formData.location.length > 3 && 
                       formData.date.length > 0 && 
@@ -253,23 +265,22 @@ const WelcomeView: React.FC<WelcomeViewProps> = ({ onStart, onAdminClick }) => {
 
   return (
     // FIX: Uso de min-h-[100dvh] para garantir que em mobile browsers a altura seja respeitada corretamente
-    // Adicionado py-12 para garantir que o conteúdo não toque as bordas em telas baixas (landscape)
     <div className="w-full min-h-[100dvh] flex flex-col items-center justify-center bg-neutral-950 relative overflow-hidden px-6 py-12">
       
-      {/* Background Decorativo */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-neutral-900 via-neutral-950 to-black z-0" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-brand-DEFAULT/5 rounded-full blur-[150px] pointer-events-none" />
-
-      {/* Admin Button (Discreet) */}
+      {/* Botão de Admin Discreto */}
       {onAdminClick && (
         <button 
           onClick={onAdminClick}
-          className="absolute top-6 right-6 z-50 text-neutral-800 hover:text-white/20 transition-colors p-2 rounded-full"
-          title="Admin"
+          className="absolute top-4 right-4 z-50 p-2 text-white/5 hover:text-white/20 transition-colors"
+          title="Admin Access"
         >
           <Lock size={16} />
         </button>
       )}
+
+      {/* Background Decorativo */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-neutral-900 via-neutral-950 to-black z-0" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-brand-DEFAULT/5 rounded-full blur-[150px] pointer-events-none" />
 
       <motion.div 
         variants={introContainer}
@@ -332,7 +343,7 @@ const WelcomeView: React.FC<WelcomeViewProps> = ({ onStart, onAdminClick }) => {
               placeholder=""
               value={formData.date}
               onChange={handleChange}
-              // Passa a data mínima para o input nativo
+              // Passa a data mínima calculada localmente
               min={today}
               // Passa o controle de status para o componente pai (WelcomeView) gerenciar a API
               externalStatus={!formData.date ? 'idle' : dateStatus}

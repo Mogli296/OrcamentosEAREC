@@ -1,7 +1,8 @@
+
 import React, { useRef, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import SignatureCanvas from 'react-signature-canvas';
-import { X, Loader2 } from 'lucide-react';
+import { X, Loader2, ShieldCheck } from 'lucide-react';
 import Button from '../ui/Button';
 import { modalVariants } from '../../lib/animations';
 
@@ -110,6 +111,14 @@ const SignatureModal: React.FC<SignatureModalProps> = ({ isOpen, onClose, onConf
               <div className="mb-6 space-y-2">
                 <p className="text-sm text-neutral-400">Ao assinar, você concorda com o valor total de:</p>
                 <p className="text-3xl text-white font-sans font-medium">{totalValue}</p>
+              </div>
+
+              {/* Aviso de Privacidade */}
+              <div className="flex items-center gap-2 mb-2">
+                <ShieldCheck size={14} className="text-green-500" />
+                <p className="text-xs text-neutral-500 font-medium uppercase tracking-wide">
+                    Não guardamos sua assinatura
+                </p>
               </div>
 
               {/* 

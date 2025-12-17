@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { motion, Variants } from 'framer-motion';
-import { ArrowRight, Instagram } from 'lucide-react';
+import { ArrowRight, Instagram, MousePointerClick } from 'lucide-react';
 import Logo from '../components/ui/Logo';
 import Button from '../components/ui/Button';
 
@@ -59,7 +60,7 @@ const IntroView: React.FC<IntroViewProps> = ({ onContinue }) => {
                     rel="noopener noreferrer"
                     className="group block w-full"
                 >
-                    <Button variant="glass" className="w-full justify-between hover:border-brand-DEFAULT/50 transition-colors py-6">
+                    <Button variant="glass" className="w-full justify-center hover:border-brand-DEFAULT/50 transition-colors gap-4 py-6">
                         <span className="flex items-center gap-3">
                             <Instagram size={20} className="text-brand-DEFAULT" />
                             <span className="font-serif italic text-lg">Você não conhece a EAREC?</span>
@@ -81,27 +82,51 @@ const IntroView: React.FC<IntroViewProps> = ({ onContinue }) => {
             {/* Opção 2: Orçamento */}
             <motion.div variants={itemVariants}>
                  <p className="text-neutral-400 text-sm uppercase tracking-widest mb-3">Já sabe o que quer?</p>
-                 <div onClick={onContinue} className="cursor-pointer">
+                 <div onClick={onContinue} className="cursor-pointer relative group/btn">
                     <motion.div
-                        className="rounded-full"
+                        className="rounded-full relative z-10"
                         animate={{
                             boxShadow: [
                             "0 0 0px rgba(220, 38, 38, 0)",
-                            "0 0 25px rgba(220, 38, 38, 0.5)",
+                            "0 0 20px rgba(220, 38, 38, 0.3)",
                             "0 0 0px rgba(220, 38, 38, 0)"
                             ]
                         }}
                         transition={{
-                            duration: 2,
+                            duration: 3,
                             repeat: Infinity,
                             ease: "easeInOut"
                         }}
                     >
-                        <Button variant="primary" className="w-full justify-between py-6 group">
-                            <span className="font-serif italic text-lg">Faça seu orçamento gratuitamente!</span>
-                            <span className="text-xs font-bold text-white flex items-center gap-2 group-hover:translate-x-1 transition-transform">
-                                CLIQUE AQUI <ArrowRight size={14} />
-                            </span>
+                        <Button variant="primary" className="w-full justify-center items-center gap-4 py-6 group relative overflow-hidden">
+                            <span className="font-serif italic text-lg text-center">Faça seu orçamento gratuitamente!</span>
+                            
+                            <div className="flex items-center gap-3">
+                                <span className="text-xs font-bold text-white flex items-center gap-2 group-hover:translate-x-1 transition-transform">
+                                    CLIQUE AQUI <ArrowRight size={14} />
+                                </span>
+
+                                {/* ANIMAÇÃO AGORA DENTRO DO BOTÃO, AO LADO DIREITO */}
+                                <motion.div
+                                    initial={{ opacity: 0, x: 5 }}
+                                    animate={{ 
+                                        opacity: 1, 
+                                        x: 0,
+                                        scale: [1, 0.92, 1] 
+                                    }}
+                                    transition={{ 
+                                        delay: 0.5,
+                                        duration: 2.5, 
+                                        repeat: Infinity, 
+                                        ease: "easeInOut" 
+                                    }}
+                                >
+                                    <MousePointerClick 
+                                        size={24}
+                                        className="text-white fill-white/20 drop-shadow-md" 
+                                    />
+                                </motion.div>
+                            </div>
                         </Button>
                     </motion.div>
                  </div>

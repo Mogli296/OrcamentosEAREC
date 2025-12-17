@@ -35,10 +35,6 @@ interface UpsellListProps {
  * 1. As abas de navegação (Categorias).
  * 2. A grade de cards de serviço (Produtos).
  * 3. Os controles de quantidade/horas (Inputs).
- * 
- * DESIGN PATTERN:
- * Utilizamos Renderização Condicional ({category === 'x' && ...}) para trocar
- * o conteúdo da grade sem recarregar a página ou usar rotas complexas.
  */
 const UpsellList: React.FC<UpsellListProps> = ({ 
   category, setCategory,
@@ -62,15 +58,13 @@ const UpsellList: React.FC<UpsellListProps> = ({
   ];
 
   // LÓGICA DE NEGÓCIO: Cálculo de Frete
-  // Se for Estúdio (cliente vai até nós) ou Personalizado (a combinar), frete é zero.
   const isNoTravelCost = category === 'studio' || category === 'custom';
   const travelCost = isNoTravelCost ? 0 : distance * 2 * pricePerKm;
 
   const whatsappNumber = "5584981048857";
 
-  // LÓGICA DE UI: Indicador Animado ("Mãozinha/Dedo")
-  // Objetivo: Ensinar o usuário que os cards são clicáveis.
-  // Regra: Aparece apenas na categoria inicial e some no primeiro clique.
+  // Estado para controlar a exibição do indicador de clique (tutorial)
+  // Inicia true, mas vai para false assim que houver qualquer clique
   const [showIndicator, setShowIndicator] = useState(true);
 
   // Effect: Remove indicador se usuário trocar de aba manualmente
@@ -78,10 +72,11 @@ const UpsellList: React.FC<UpsellListProps> = ({
       if (category !== 'social') setShowIndicator(false);
   }, [category]);
 
-  // Handler: Ao clicar em um serviço, seleciona e esconde a ajuda visual
+  // Handler simples para clique no serviço
   const handleServiceClick = (id: ServiceId) => {
       setServiceId(id);
-      setShowIndicator(false);
+      // Remove o indicador imediatamente ao clicar em qualquer serviço
+      setShowIndicator(false); 
   };
 
   return (
@@ -105,17 +100,14 @@ const UpsellList: React.FC<UpsellListProps> = ({
                                 isActive 
                                     ? cn(
                                         "bg-brand-DEFAULT text-white shadow-lg shadow-brand-DEFAULT/20",
-                                        // APLICA BORDA BRANCA para destaque (Exceto Custom que tem cor própria)
                                         cat.id !== 'custom' && "border-2 border-white"
                                     ) 
                                     : "text-neutral-400 hover:text-white hover:bg-white/5",
-                                // Destaque dourado/vermelho para "Personalizado" quando inativo
                                 cat.highlight && !isActive && "text-brand-DEFAULT hover:bg-brand-DEFAULT/10 border border-brand-DEFAULT/20"
                             )}
                         >
                             <Icon size={18} className="shrink-0" />
                             <span className="hidden sm:inline">{cat.label}</span>
-                            {/* Versão mobile abreviada do texto */}
                             <span className="sm:hidden">{cat.label.split(' ')[0]}</span>
                         </button>
                     )
@@ -123,8 +115,7 @@ const UpsellList: React.FC<UpsellListProps> = ({
             </div>
         </div>
 
-        {/* Container dos Cards (Animação de entrada suave ao trocar categoria) */}
-        {/* ALTERAÇÃO: Trocamos o animate fixo por variants={staggerContainer} para cascata */}
+        {/* Container dos Cards */}
         <motion.div 
             key={category}
             initial="hidden"
@@ -132,41 +123,8 @@ const UpsellList: React.FC<UpsellListProps> = ({
             variants={staggerContainer}
             className="space-y-8 relative"
         >
-            {/* 
-               === INDICADOR DE INTERAÇÃO (MOUSE CLICK) === 
-               Posicionado estrategicamente sobre o PRIMEIRO CARD.
-               Mobile: Centralizado.
-               Desktop: Alinhado à esquerda (primeira coluna).
-            */}
-            <AnimatePresence>
-                {showIndicator && category === 'social' && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        // Ajuste de posição: Topo alinhado com o card, esquerda ajustada para mobile/desktop
-                        className="absolute top-12 left-1/2 -translate-x-1/2 md:left-32 md:translate-x-0 z-30 pointer-events-none"
-                    >
-                        {/* Ícone Pulsante (Mouse Pointer) - Animação de "Toque/Clique" sutil */}
-                        <motion.div
-                            animate={{ 
-                                scale: [1, 0.9, 1], // Simula o pressionar do botão
-                                rotate: [0, -15, 0] // Leve inclinação para parecer natural
-                            }}
-                            transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
-                        >
-                            <MousePointerClick size={48} className="text-white fill-brand-DEFAULT drop-shadow-[0_5px_15px_rgba(220,38,38,0.6)]" />
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-            {/* === 2. GRID DE SERVIÇOS (RENDERIZAÇÃO CONDICIONAL) === */}
-            {/* 
-                NOTA: Removemos 'auto-rows-fr' para que os cards tenham altura independente.
-                Assim, quando um card expande (info), o vizinho não estica junto.
-                Usamos 'items-start' para alinhar ao topo se houver diferença de altura.
-            */}
+            
+            {/* === 2. GRID DE SERVIÇOS === */}
             
             {/* CATEGORIA: SOCIAL */}
             {category === 'social' && (
@@ -176,6 +134,8 @@ const UpsellList: React.FC<UpsellListProps> = ({
                         icon={Gift} title="Aniversário / Chá" price="R$ 400 (2h)"
                         desc="Cobertura completa dos parabéns e decoração."
                         details="Inclui 2 horas de cobertura fotográfica. Todas as fotos tratadas entregues via link. Valor de hora extra aplicável. Ideal para Chá Revelação, Mesversário e Aniversários intimistas."
+                        // Só mostra o indicador se showIndicator for true E estivermos nesse card
+                        clickIndicator={showIndicator} 
                     /></motion.div>
                     <motion.div variants={fadeInUp}><ServiceCard 
                         active={serviceId === 'fifteen'} onClick={() => handleServiceClick('fifteen')}
@@ -322,7 +282,6 @@ const UpsellList: React.FC<UpsellListProps> = ({
 
             {/* === 3. CONTROLES QUANTITATIVOS (CONDICIONAIS) === */}
             
-            {/* Seletor de HORAS (Apenas para categorias temporais: Aniversário/15 Anos) */}
             {(serviceId === 'birthday' || serviceId === 'fifteen') && category === 'social' && (
                 <motion.div variants={fadeInUp} className="bg-white/5 p-8 rounded-xl border border-white/10 flex flex-col items-center">
                     <div className="flex items-center gap-2 text-white mb-6">
@@ -346,7 +305,6 @@ const UpsellList: React.FC<UpsellListProps> = ({
                 </motion.div>
             )}
 
-            {/* Seletor de QUANTIDADE (Para itens unitários: Fotos, Edições) */}
             {(
                 (category === 'commercial' && (serviceId === 'comm_photo' || serviceId === 'comm_combo')) || 
                 serviceId === 'studio_photo' || 
@@ -392,7 +350,6 @@ const UpsellList: React.FC<UpsellListProps> = ({
                 </motion.div>
             )}
 
-            {/* ADICIONAIS (Checkboxes) - Social Only */}
             {category === 'social' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <motion.div 
@@ -457,8 +414,7 @@ const UpsellList: React.FC<UpsellListProps> = ({
 };
 
 // Componente Auxiliar: ServiceCard
-// Renderiza cada opção de serviço com estado de ativo e detalhes expansíveis
-const ServiceCard = ({ active, onClick, icon: Icon, title, price, desc, details, highlight }: any) => {
+const ServiceCard = ({ active, onClick, icon: Icon, title, price, desc, details, highlight, clickIndicator }: any) => {
     const [showDetails, setShowDetails] = useState(false);
 
     return (
@@ -474,6 +430,32 @@ const ServiceCard = ({ active, onClick, icon: Icon, title, price, desc, details,
         >
             {active && <div className="absolute top-0 right-0 w-16 h-16 bg-brand-DEFAULT/20 blur-xl rounded-full -mr-8 -mt-8 pointer-events-none" />}
             
+            {/* INDICADOR DE CLIQUE DENTRO DO CARD (SE HABILITADO) */}
+            <AnimatePresence>
+                {clickIndicator && (
+                    <motion.div
+                        className="absolute right-4 bottom-4 z-20 pointer-events-none"
+                        initial={{ opacity: 0 }}
+                        animate={{ 
+                            opacity: 1, 
+                            scale: [1, 0.9, 1],
+                            rotate: [0, -10, 0] 
+                        }}
+                        transition={{ 
+                            duration: 2, 
+                            repeat: Infinity, 
+                            ease: "easeInOut" 
+                        }}
+                        exit={{ opacity: 0 }}
+                    >
+                         <MousePointerClick 
+                            size={28}
+                            className="text-white fill-white/20 drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]" 
+                        />
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             <div>
                 {/* 
                    HEADER DO CARD 

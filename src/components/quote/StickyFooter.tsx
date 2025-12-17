@@ -23,8 +23,7 @@ const StickyFooter: React.FC<StickyFooterProps> = ({ totalPrice, onApprove, isAp
     >
       {/* 
          GRADIENTE REDUZIDO DRASTICAMENTE 
-         Antes: h-32 -top-32 (muito alto e invasivo)
-         Agora: h-12 -top-12 (sutil, apenas para separar visualmente)
+         Sutil, apenas para separar visualmente
       */}
       <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 to-transparent pointer-events-none h-12 -top-12" />
       
@@ -79,9 +78,10 @@ const StickyFooter: React.FC<StickyFooterProps> = ({ totalPrice, onApprove, isAp
                     variant="primary" 
                     size="lg" 
                     onClick={onApprove}
-                    className="w-full sm:min-w-[200px] flex items-center justify-center gap-2 py-3 md:py-4 text-sm md:text-base"
+                    className="w-full sm:min-w-[200px] flex items-center justify-center gap-2 py-3 md:py-4 text-sm md:text-base relative overflow-hidden"
                   >
-                    Revisar Contrato <ArrowRight size={18} />
+                    <span>Revisar Contrato</span> 
+                    <ArrowRight size={18} />
                   </Button>
                 </motion.div>
               ) : (
